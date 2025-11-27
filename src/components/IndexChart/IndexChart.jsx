@@ -1,6 +1,7 @@
+import "./IndexChart.scss";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { formatVolume } from "../utils/format";
+import { formatVolume } from "../../utils/format";
 
 // lineData: mảng giá từng mốc thời gian
 // volumeData: mảng khối lượng từng mốc thời gian

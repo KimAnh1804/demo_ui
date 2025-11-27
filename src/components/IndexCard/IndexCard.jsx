@@ -1,12 +1,16 @@
+import "./IndexCard.scss";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { formatVolume, formatValueBillion } from "../utils/format";
-import IndexChart from "./IndexChart";
+import { formatVolume, formatValueBillion } from "../../utils/format";
+import IndexChart from "../IndexChart";
 import {
   ArrowUpOutlined,
   ArrowDownOutlined,
   CaretDownOutlined,
 } from "@ant-design/icons";
-import { subscribeStream, unsubscribeStream } from "../services/socketStream";
+import {
+  subscribeStream,
+  unsubscribeStream,
+} from "../../services/socketStream";
 
 const AVAILABLE_INDICES = [
   { code: "VNI", label: "VNI" },
@@ -131,6 +135,7 @@ export default function IndexCard({
   // Khi chọn chỉ số mới từ dropdown sẽ đổi currentSymbol
   const handleSelectIndex = (newSymbolCode, newTitle) => {
     setCurrentSymbol(newSymbolCode);
+    setDisplayTitle(newTitle);
     setShowDropdown(false);
     if (onSymbolChange) onSymbolChange(newSymbolCode);
   };
@@ -157,24 +162,7 @@ export default function IndexCard({
   const isPositive = displayChange >= 0;
 
   return (
-    <div
-      style={{
-        background: "#262626",
-        borderRadius: "0.5rem",
-        padding: "0.7rem 0.5rem 0.5rem 0.5rem",
-        flex: 1,
-        minWidth: 0,
-        maxWidth: "100%",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 0.125rem 0.5rem rgba(0,0,0,0.45)",
-        position: "relative",
-        border: "1px solid #1a1a1a",
-        height: "33%",
-        boxSizing: "border-box",
-        minHeight: 0,
-      }}
-    >
+    <div className="index-card-root">
       <IndexChart
         lineData={line}
         volumeData={volume}
@@ -185,102 +173,42 @@ export default function IndexCard({
 
       {/* Hiển thị dữ liệu khi hover */}
       {hoveredData && (
-        <div
-          style={{
-            position: "absolute",
-            top: 10,
-            right: 10,
-            background: "rgba(0, 0, 0, 0.8)",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            fontSize: "12px",
-            border: "1px solid #444",
-            zIndex: 10,
-          }}
-        >
-          <div style={{ color: "#aaa" }}>
+        <div className="index-card-hover-info">
+          <div className="index-card-hover-time">
             {hoveredData.time} : {hoveredData.value?.toFixed(2)}
           </div>
-          <div style={{ color: "#4dd6ff", marginTop: 4 }}>
+          <div className="index-card-hover-volume">
             KL: {hoveredData.volume}
           </div>
         </div>
       )}
 
-      <div
-        style={{
-          marginTop: "0.5rem",
-          fontSize: "1.1rem",
-          color: "#ff6a00",
-          fontWeight: 700,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "pointer",
-          position: "relative",
-        }}
-        ref={dropdownRef}
-      >
+      <div className="index-card-title-row" ref={dropdownRef}>
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            cursor: "pointer",
-          }}
+          className="index-card-title-select"
           onClick={() => setShowDropdown(!showDropdown)}
         >
           <span>{displayTitle}</span>
-          <CaretDownOutlined
-            style={{
-              fontSize: 14,
-              transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s",
-            }}
-          />
+          <CaretDownOutlined className={showDropdown ? "dropdown-open" : ""} />
         </div>
-
         {/* Dropdown menu */}
         {showDropdown && (
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 0,
-              right: 0,
-              background: "#1a1a1a",
-              border: "1px solid #2a2a2a",
-              borderRadius: "4px",
-              marginTop: "4px",
-              zIndex: 100,
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.8)",
-              overflow: "hidden",
-            }}
-          >
+          <div className="index-card-dropdown">
             {AVAILABLE_INDICES.map((index) => (
               <div
                 key={index.code}
+                className={
+                  "index-card-dropdown-item" +
+                  (symbolCode === index.code ? " selected" : "")
+                }
                 onClick={() => handleSelectIndex(index.code, index.label)}
-                style={{
-                  padding: "10px 12px",
-                  borderBottom: "1px solid #252525",
-                  cursor: "pointer",
-                  color: "#fff",
-                  fontSize: "14px",
-                  transition: "background-color 0.2s",
-                  backgroundColor:
-                    symbolCode === index.code ? "#2E52B2" : "transparent",
-                  textAlign: "left",
-                }}
                 onMouseEnter={(e) => {
-                  if (symbolCode !== index.code) {
-                    e.target.style.backgroundColor = "#252525";
-                  }
+                  if (symbolCode !== index.code)
+                    e.target.classList.add("hover");
                 }}
                 onMouseLeave={(e) => {
-                  if (symbolCode !== index.code) {
-                    e.target.style.backgroundColor = "transparent";
-                  }
+                  if (symbolCode !== index.code)
+                    e.target.classList.remove("hover");
                 }}
               >
                 {index.label}
@@ -290,25 +218,14 @@ export default function IndexCard({
         )}
       </div>
 
-      <div
-        style={{
-          marginTop: "0.5rem",
-          fontSize: "1.5rem",
-          fontWeight: 700,
-          wordBreak: "break-all",
-        }}
-      >
-        <span style={{ color: isPositive ? "#52c41a" : "#ff4d4f" }}>
+      <div className="index-card-price-row">
+        <span className={isPositive ? "price-up" : "price-down"}>
           {displayPrice}
         </span>
         <span
-          style={{
-            fontSize: "0.85rem",
-            marginLeft: "0.5rem",
-            color: isPositive ? "#52c41a" : "#ff4d4f",
-            display: "inline-flex",
-            alignItems: "center",
-          }}
+          className={
+            "index-card-change " + (isPositive ? "price-up" : "price-down")
+          }
         >
           {isPositive ? (
             <ArrowUpOutlined style={{ marginRight: 4 }} />
@@ -319,64 +236,28 @@ export default function IndexCard({
         </span>
       </div>
 
-      <div
-        style={{
-          marginTop: "0.7rem",
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: "0.9rem",
-          color: "#bbb",
-          gap: "1.5rem",
-        }}
-      >
+      <div className="index-card-volume-value-row">
         <div>
-          <div style={{ color: "#999", marginBottom: "0.1rem" }}>KL</div>
-          <div
-            style={{ color: "#fff", fontWeight: 500, wordBreak: "break-all" }}
-          >
-            {displayVolumeText}
-          </div>
+          <div className="index-card-label">KL</div>
+          <div className="index-card-value">{displayVolumeText}</div>
         </div>
-
         <div>
-          <div style={{ color: "#999", marginBottom: "0.1rem" }}>GT</div>
-          <div
-            style={{ color: "#fff", fontWeight: 500, wordBreak: "break-all" }}
-          >
-            {displayValueText}
-          </div>
+          <div className="index-card-label">GT</div>
+          <div className="index-card-value">{displayValueText}</div>
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: "0.7rem",
-          display: "flex",
-          justifyContent: "space-between",
-          fontSize: "0.9rem",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-        }}
-      >
-        <div
-          style={{ color: "#52c41a", display: "flex", alignItems: "center" }}
-        >
+      <div className="index-card-up-mid-down-row">
+        <div className="index-card-up">
           <ArrowUpOutlined style={{ marginRight: 4 }} />
           <span>{displayUp}</span>
         </div>
-        <div style={{ color: "#faad14", minWidth: 0, wordBreak: "break-all" }}>
-          {displayMid}
-        </div>
-        <div
-          style={{ color: "#ff4d4f", display: "flex", alignItems: "center" }}
-        >
+        <div className="index-card-mid">{displayMid}</div>
+        <div className="index-card-down">
           <ArrowDownOutlined style={{ marginRight: 4 }} />
           <span>{displayDown}</span>
         </div>
-        <div style={{ color: "#1890ff", fontSize: "0.8rem" }}>
-          Phiên liên tục
-        </div>
+        <div className="index-card-session">Phiên liên tục</div>
       </div>
     </div>
   );

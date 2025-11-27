@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import IndexCard from "./components/IndexCard";
 import MainTable from "./components/MainTable";
+import IndexChart from "./components/IndexChart";
 import websocket, {
   subscribeStream,
   unsubscribeStream,
 } from "./services/socketStream";
 import { formatVolume, formatValueBillion } from "./utils/format";
+import "./App.scss";
 
 export default function App() {
   // Danh sách các topic socket cho từng chỉ số
@@ -209,47 +211,12 @@ export default function App() {
   ]);
 
   return (
-    <div
-      style={{
-        background: "#0a0a0a",
-        color: "#fff",
-        width: "100vw",
-        height: "100vh",
-        minHeight: "100vh",
-        padding: "24px 32px 24px 32px", // padding đều các cạnh
-        margin: 0,
-        fontFamily:
-          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-        overflow: "hidden",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "24px",
-          alignItems: "stretch",
-          height: "100%",
-          width: "100%",
-          boxSizing: "border-box",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            flexDirection: "row",
-            height: "100%",
-            width: "100%",
-            minWidth: 0,
-            justifyContent: "space-between",
-            alignItems: "stretch",
-          }}
-        >
-          {cardConfigs.map((config) => (
+    <div className="app-root">
+      <div className="app-layout">
+        <div className="app-cards">
+          {cardConfigs.map((config, idx) => (
             <IndexCard
-              key={config.symbolCode}
+              key={config.symbolCode + "-" + idx}
               title={config.title}
               symbolCode={config.symbolCode}
               line={config.line}
@@ -263,18 +230,23 @@ export default function App() {
               up={config.up}
               mid={config.mid}
               down={config.down}
-              onSymbolChange={
-                selectedSymbol === config.symbolCode
-                  ? (newSymbolCode) => setSelectedSymbol(newSymbolCode)
-                  : undefined
-              }
+              onSymbolChange={(newSymbolCode) => {
+                // Khi chọn symbol mới, cập nhật lại cardConfigs cho card này
+                setCardConfigs((prev) => {
+                  // Tìm dữ liệu mới tương ứng symbol mới
+                  const found = prev.find(
+                    (c) => c.symbolCode === newSymbolCode
+                  );
+                  if (!found) return prev;
+                  // Cập nhật card tại idx bằng dữ liệu mới
+                  return prev.map((c, i) => (i === idx ? { ...found } : c));
+                });
+              }}
               isSelected={selectedSymbol === config.symbolCode}
             />
           ))}
         </div>
-
-        {/* Bảng bên phải */}
-        <div style={{ height: "100%", width: "100%", minWidth: 0 }}>
+        <div className="app-table">
           <MainTable data={indexList} />
         </div>
       </div>

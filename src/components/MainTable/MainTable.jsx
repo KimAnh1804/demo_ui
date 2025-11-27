@@ -1,7 +1,8 @@
+import "./MainTable.scss";
 import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons";
-import { formatVolume, formatValueBillion } from "../utils/format";
+import { formatVolume, formatValueBillion } from "../../utils/format";
 import { useState, useEffect, useCallback } from "react";
-import { useStreamTopic } from "../services/socketStream";
+import { useStreamTopic } from "../../services/socketStream";
 
 export default function MainTable({ data: initialData }) {
   // State lưu dữ liệu bảng, luôn đồng bộ với props và realtime socket
@@ -78,80 +79,34 @@ export default function MainTable({ data: initialData }) {
   }, [initialData]);
 
   return (
-    <div
-      style={{
-        background: "#262626",
-        borderRadius: "10px",
-        padding: "0",
-        overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.45)",
-        border: "1px solid #1a1a1a",
-        height: "33%",
-        width: "100%",
-        minWidth: 0,
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-        alignSelf: "stretch",
-      }}
-    >
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          fontSize: "15px",
-          flex: 1,
-          overflow: "auto",
-        }}
-      >
+    <div className="main-table-root">
+      <table className="main-table-table">
         <thead>
-          <tr
-            style={{ borderBottom: "1px solid #262626", background: "#262626" }}
-          >
-            <th
-              style={{
-                textAlign: "left",
-                padding: "8px 10px",
-                fontWeight: 300,
-              }}
-            >
+          <tr className="main-table-header-row">
+            <th className="main-table-header main-table-header-name">
               Chỉ số chính
             </th>
-            <th style={{ padding: "8px 10px", fontWeight: 600 }}>+/-</th>
-            <th style={{ padding: "8px 10px", fontWeight: 600 }}>KL (Tr)</th>
-            <th style={{ padding: "8px 10px", fontWeight: 600 }}>GT (Tỷ)</th>
-            <th style={{ padding: "8px 10px", fontWeight: 600 }}>
-              CK Tăng/Giảm
-            </th>
+            <th className="main-table-header">+/-</th>
+            <th className="main-table-header">KL (Tr)</th>
+            <th className="main-table-header">GT (Tỷ)</th>
+            <th className="main-table-header">CK Tăng/Giảm</th>
           </tr>
         </thead>
-
         <tbody>
           {tableData.map((row, i) => {
             const isPositive = row.change >= 0;
             return (
-              <tr key={i} style={{ borderBottom: "1px solid #1a1a1a" }}>
-                <td style={{ padding: "8px 10px", textAlign: "left" }}>
-                  <span style={{ color: "#ff6a00", fontWeight: 600 }}>
-                    {row.name}
-                  </span>
+              <tr key={i} className="main-table-body-row">
+                <td className="main-table-cell main-table-name-cell">
+                  <span className="main-table-name">{row.name}</span>
                 </td>
-
                 <td
-                  style={{
-                    padding: "8px 10px",
-                    color: isPositive ? "#52c41a" : "#ff4d4f",
-                    textAlign: "center",
-                    fontWeight: 500,
-                  }}
+                  className={
+                    "main-table-cell main-table-change-cell " +
+                    (isPositive ? "main-table-up" : "main-table-down")
+                  }
                 >
-                  <span
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
+                  <span className="main-table-change-content">
                     {isPositive ? (
                       <ArrowUpOutlined style={{ marginRight: 4 }} />
                     ) : (
@@ -160,42 +115,22 @@ export default function MainTable({ data: initialData }) {
                     {row.change} ({row.percent}%)
                   </span>
                 </td>
-
-                <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                <td className="main-table-cell main-table-volume-cell">
                   {formatVolume(row.volume)}
                 </td>
-                <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                <td className="main-table-cell main-table-value-cell">
                   {row.value !== undefined && row.value !== null
                     ? formatValueBillion(row.value)
                     : "0"}
                 </td>
-
-                <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#52c41a",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
+                <td className="main-table-cell main-table-upmid-cell">
+                  <div className="main-table-upmid-content">
+                    <span className="main-table-up">
                       <ArrowUpOutlined style={{ marginRight: 4 }} />
                       {row.up}
                     </span>
-                    <span style={{ color: "#faad14" }}>{row.mid}</span>
-                    <span
-                      style={{
-                        color: "#ff4d4f",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
+                    <span className="main-table-mid">{row.mid}</span>
+                    <span className="main-table-down">
                       <ArrowDownOutlined style={{ marginRight: 4 }} />
                       {row.down}
                     </span>

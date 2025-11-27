@@ -1,0 +1,93 @@
+
+.main-table-root {
+  background: #262626;
+  border-radius: 1rem;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  border: 1px solid #1a1a1a;
+  height: auto;
+  width: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  align-self: stretch;
+}
+
+.main-table-table {
+  width: auto;
+  border-collapse: collapse;
+  font-size: 15px;
+  flex: 1;
+  overflow: auto;
+}
+
+.main-table-header-row {
+  border-bottom: 1px solid #262626;
+  background: #262626;
+}
+
+.main-table-header {
+  padding: 8px 10px;
+  font-weight: 600;
+}
+.main-table-header-name {
+  text-align: left;
+  font-weight: 300;
+}
+
+.main-table-body-row {
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.main-table-cell {
+  padding: 8px 10px;
+  text-align: center;
+}
+.main-table-name-cell {
+  text-align: left;
+}
+.main-table-name {
+  color: #ff6a00;
+  font-weight: 600;
+}
+
+.main-table-change-cell {
+  font-weight: 500;
+}
+.main-table-up {
+  color: #52c41a;
+}
+.main-table-down {
+  color: #ff4d4f;
+}
+.main-table-change-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-table-volume-cell,
+.main-table-value-cell,
+.main-table-upmid-cell {
+  text-align: center;
+}
+
+.main-table-upmid-content {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.main-table-up {
+  color: #52c41a;
+  display: flex;
+  align-items: center;
+}
+.main-table-mid {
+  color: #faad14;
+}
+.main-table-down {
+  color: #ff4d4f;
+  display: flex;
+  align-items: center;
+}
