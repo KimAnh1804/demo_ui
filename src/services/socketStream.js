@@ -1,3 +1,96 @@
+// Gửi lệnh HIST_REQ cho topic
+let histSeq = 1;
+function emitHISTREQ(topicFull, clientSeq, transId) {
+  const s = initSocket();
+  let topic = topicFull;
+  let value = "";
+  if (topicFull.includes("|")) {
+    const arr = topicFull.split("|");
+    if (arr.length >= 3) {
+      topic = arr.slice(0, 2).join("|");
+      value = arr[2];
+    }
+  }
+  // Tạo ClientSeq và TransId nhỏ, tăng dần
+  if (clientSeq === undefined) {
+    clientSeq = histSeq;
+    histSeq += 1;
+  }
+  if (transId === undefined) {
+    transId = String(clientSeq);
+  }
+  const payload = {
+    ClientSeq: clientSeq,
+    TransId: transId,
+    topic: [topic],
+    value: [value],
+    fromseq: [0],
+    size: [500],
+  };
+  s.emit("HIST_REQ", payload);
+}
+// INTRADAY_1m realtime
+const INTRADAY_TOPICS = [
+  "INTRADAY_1m|STO|001",
+  "INTRADAY_1m|STO|101",
+  "INTRADAY_1m|STX|002",
+  "INTRADAY_1m|UPX|301",
+  "INTRADAY_1m|STX|100",
+];
+let currentIntradayTopic = null;
+
+// Sub 1 topic, unsub topic cũ nếu có, log HIST_RES
+export function subscribeIntradayTopic(topic, { onHistRes, onFOSStream } = {}) {
+  if (!INTRADAY_TOPICS.includes(topic)) {
+    console.warn("Topic không hợp lệ:", topic);
+    return;
+  }
+  // Unsub topic cũ
+  if (currentIntradayTopic && currentIntradayTopic !== topic) {
+    unsubscribeStream(currentIntradayTopic);
+  }
+  currentIntradayTopic = topic;
+  // Gửi HIST_REQ khi chọn topic mới
+  emitHISTREQ(topic);
+  // Đăng ký handler riêng cho từng loại event
+  const histHandler = (data) => {
+    if (data && (data.type === "HIST_RES" || data[0] === "HIST_RES")) {
+      let d = Array.isArray(data) ? data[1] : data;
+
+      if (
+        Array.isArray(data) &&
+        data[0] === "HIST_RES" &&
+        data[1] &&
+        data[1].Data &&
+        Array.isArray(data[1].Data) &&
+        data[1].Data[0] &&
+        data[1].Data[0].topic
+      ) {
+        logTopic = data[1].Data[0].topic;
+        logData = data[1];
+        foundTopic = true;
+      } else if (
+        data.Data &&
+        Array.isArray(data.Data) &&
+        data.Data[0] &&
+        data.Data[0].topic
+      ) {
+        logTopic = data.Data[0].topic;
+        foundTopic = true;
+      }
+      if (!foundTopic) logTopic = "NO_TOPIC";
+      if (onHistRes) onHistRes(logData, logTopic);
+    }
+  };
+  subscribeStream(topic, histHandler);
+}
+
+export function unsubscribeIntradayTopic() {
+  if (currentIntradayTopic) {
+    unsubscribeStream(currentIntradayTopic);
+    currentIntradayTopic = null;
+  }
+}
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 
@@ -112,8 +205,6 @@ const routeDataToHandlers = (data) => {
     } catch (err) {
       console.error("Lỗi xử lý dữ liệu cho topic", topic, ":", err);
     }
-  } else if (topic) {
-    console.warn("Không có handler đăng ký cho topic:", topic);
   }
 };
 
@@ -161,4 +252,6 @@ export default {
   unsubscribeStream,
   useStreamTopic,
   getStreamStatus,
+  subscribeIntradayTopic,
+  unsubscribeIntradayTopic,
 };

@@ -17,43 +17,62 @@ export default function IndexChart({
 }) {
   //  hiển thị 7 mốc thời gian
   const timeSlots = ["09h", "10h", "11h", "12h", "13h", "14h", "15h"];
+  // Xác định mốc giờ hiện tại
+  const now = new Date();
+  const currentHour = now.getHours();
+  let currentSlot = 0;
+  if (currentHour >= 15) {
+    currentSlot = 6;
+  } else if (currentHour < 9) {
+    currentSlot = 0;
+  } else {
+    for (let i = timeSlots.length - 1; i >= 0; i--) {
+      const slotHour = Number(timeSlots[i].replace("h", ""));
+      if (currentHour >= slotHour) {
+        currentSlot = i;
+        break;
+      }
+    }
+  }
 
-  const paddedLineData = Array.from({ length: 7 }, (_, i) =>
-    lineData[i] !== undefined ? lineData[i] : null
-  );
-  const paddedVolumeData = Array.from({ length: 7 }, (_, i) =>
-    volumeData[i] !== undefined ? volumeData[i] : 0
-  );
+  const paddedLineData = [
+    ...lineData,
+    ...Array(7 - lineData.length).fill(null),
+  ].slice(0, 7);
+  const paddedVolumeData = [
+    ...volumeData,
+    ...Array(7 - volumeData.length).fill(0),
+  ].slice(0, 7);
 
+  // cấu hình Highcharts
   const options = {
     chart: {
-      backgroundColor: "#262626",
+      type: "line",
       height: 140,
       margin: [6, 6, 28, 24],
-
-      // Khi hover chuột lên chart sẽ trả về thông tin giá/khối lượng tại điểm đó
-      events: {
-        mousemove(event) {
-          const point = this.series[1].searchPoint(event, true);
-          if (point) {
-            const hoverInfo = {
-              index: point.index,
-              value: point.y,
-              volume: this.series[0].data[point.index]?.y || 0,
-              time: this.xAxis[0].categories?.[point.index] || "",
-            };
-            if (onHoverData) onHoverData(hoverInfo);
-          }
-        },
-        mouseleave() {
-          if (onHoverData) onHoverData(null);
-        },
-      },
+      backgroundColor: "#262626",
     },
-    title: { text: "" },
+    title: { text: null },
     credits: { enabled: false },
     legend: { enabled: false },
-
+    plotOptions: {
+      series: {
+        marker: { enabled: false, radius: 8 },
+        animation: false,
+      },
+      column: {
+        animation: false,
+        dataLabels: { style: { textShadow: false } },
+        pointWidth: 1,
+        maxPointWidth: 1,
+        minPointWidth: 1,
+        borderWidth: 0,
+      },
+      line: {
+        lineWidth: 2,
+        dataLabels: { style: { textShadow: false } },
+      },
+    },
     xAxis: {
       categories: timeSlots,
       labels: {
@@ -62,35 +81,70 @@ export default function IndexChart({
         y: 16,
       },
       tickLength: 0,
+      lineWidth: 0,
+      minorGridLineWidth: 0,
     },
-
     yAxis: [
-      { title: { text: "" }, gridLineWidth: 0 },
-      { title: { text: "" }, opposite: true, gridLineWidth: 0 },
+      {
+        visible: true,
+        opposite: true,
+        labels: { enabled: false },
+        title: { text: null },
+        plotLines: [
+          {
+            value: reference,
+            zIndex: 10,
+            width: 0,
+            color: "#CE9B51",
+            label: {
+              text: reference != null ? reference.toFixed(2) : "", // Hiển thị giá tham chiếu
+              align: "center",
+              style: {
+                color: "var(--TEXT__1)",
+                fontSize: "0.65rem",
+              },
+            },
+          },
+        ],
+      },
+      {
+        visible: true,
+        labels: { enabled: false },
+        title: { text: null },
+      },
     ],
-
     tooltip: {
       shared: true,
-      backgroundColor: "#1a1a1a",
-      borderColor: "#2a2a2a",
-      style: { color: "#fff" },
-      formatter() {
-        let result = `<b>${symbolCode || ""}</b><br>`;
-        this.points.forEach((point) => {
-          if (point.series.type === "line" && point.series.index === 1) {
-            result += `<span style=\"color:#00ff66\">${point.y.toFixed(
-              2
-            )}</span><br>`;
-          } else if (point.series.type === "column") {
-            result += `<span style=\"color:#4dd6ff\">KL: ${formatVolume(
-              point.y
-            )}</span><br>`;
-          }
-        });
-        return result;
+      useHTML: true,
+      padding: 8,
+      backgroundColor: "var(PRIMARY__BG__COLOR)",
+      formatter: function () {
+        const indexValue = this.points?.[1]?.y ?? 0;
+        const valueColor = this.points?.[1]?.color ?? "";
+        const indexVolume = this.points?.[0]?.y ?? 0;
+        const volumeColor = this.points?.[0]?.color ?? "";
+        const time = this.points?.[1]?.x ?? "";
+        return `
+          <div class='flex flex-1 flex-direction-column fs-verySmall' style="background-color: var(--PRIMARY__BG__COLOR); color: var(--TEXT__1); padding: 8px;">
+            <div class='flex-1'>${
+              timeSlots[this.points?.[1]?.point?.index ?? 0] || ""
+            }</div>
+            <div class='flex-1'>
+              ${
+                symbolCode || ""
+              }: <span style="color: ${valueColor}; font-weight: bold;">${
+          indexValue?.toFixed ? indexValue.toFixed(2) : indexValue
+        }</span>
+            </div>
+            <div class='flex-1'>
+              Khối lượng: <span style="color: ${volumeColor}; font-weight: bold;">${formatVolume(
+          indexVolume
+        )}</span>
+            </div>
+          </div>
+        `.replace(/<!-- -->/g, "");
       },
     },
-
     series: [
       {
         type: "column",

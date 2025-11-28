@@ -36,6 +36,7 @@ export default function IndexCard({
   up,
   mid,
   down,
+  sessionText,
   onSymbolChange,
 }) {
   // Map mã chỉ số sang topic socket tương ứng
@@ -257,7 +258,7 @@ export default function IndexCard({
           <ArrowDownOutlined style={{ marginRight: 4 }} />
           <span>{displayDown}</span>
         </div>
-        <div className="index-card-session">Phiên liên tục</div>
+        <div className="index-card-session">{sessionText || ""}</div>
       </div>
     </div>
   );

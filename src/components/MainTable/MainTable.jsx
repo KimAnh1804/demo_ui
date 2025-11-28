@@ -38,6 +38,7 @@ export default function MainTable({ data: initialData }) {
       if (message.symbol || message.code || message.name) {
         const indexName = message.symbol || message.code || message.name;
         return prevData.map((row) => {
+          // Tìm đúng chỉ số để cập nhật
           if (row.name === indexName || row.code === indexName) {
             const mapped = {
               ...row,
