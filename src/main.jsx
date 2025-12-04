@@ -4,9 +4,11 @@ import "./index.css";
 import App from "./App.jsx";
 import { AuthProvider } from "./contexts/AuthContext";
 import websocket from "./services/socketStream";
+import * as tradingSocket from "./services/socketTrading";
 
-// Khởi tạo socket connection sớm nhất có thể
+// Khởi tạo socket connection sớm
 websocket.initSocket();
+tradingSocket.initTradingSocket();
 
 createRoot(document.getElementById("root")).render(
   <AuthProvider>
