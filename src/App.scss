@@ -2,36 +2,37 @@
 .app-layout {
   display: flex;
   flex-direction: row;
-  max-width: auto;
   width: 100%;
-  min-height: 100vh;
   align-items: stretch;
-  gap: 2.5rem;
+  gap: 1rem;
   box-sizing: border-box;
-  padding: 2.5rem 2rem 0 2rem;
+  padding: 2rem 2rem 0 2rem;
   margin: 0 auto;
-  justify-content: center;
-  background: none;
-  height: auto;
+  background: black;
+  height: 100%;
 }
 
 .app-cards {
   display: flex;
   flex-direction: row;
-  gap: 2.5rem;
-  flex-wrap: nowrap;
+  gap: 1rem;
   align-items: stretch;
-  width: 200%;
-  justify-content: space-between;
+  flex: 0 0 auto;
+ // min-width: 0;
+  overflow-x: auto;
   height: 100%;
+
+  
 }
 
 .app-table {
-  flex: 1 1 0%;
+  flex: 1 1 auto;
   align-self: stretch;
   display: flex;
-  margin-right: 0;
-  height: 100%;
-  width: auto;
-
+ // min-width: fit-content;
+  height: 415px;
+ width: 200%;
+ visibility: visible;
+ 
+ 
 }

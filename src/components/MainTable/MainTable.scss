@@ -6,20 +6,23 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
   border: 1px solid #1a1a1a;
-  height: auto;
-  width: auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   align-self: stretch;
+  width: 850px;
+  height: 108%;
+  
 }
 
 .main-table-table {
-  width: auto;
+  width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 14px;
   flex: 1;
   overflow: auto;
+  height: 100px;
+  
 }
 
 .main-table-header-row {

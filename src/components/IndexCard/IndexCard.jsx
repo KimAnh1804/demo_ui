@@ -20,6 +20,14 @@ const AVAILABLE_INDICES = [
   { code: "HNX30", label: "HNX30" },
 ];
 
+const SYMBOL_TO_TOPIC = {
+  VNI: "KRXMDDS|IGI|STO|001",
+  VN30: "KRXMDDS|IGI|STO|101",
+  HNX: "KRXMDDS|IGI|STX|002",
+  UPCOM: "KRXMDDS|IGI|UPX|301",
+  HNX30: "KRXMDDS|IGI|STX|100",
+};
+
 // Card hiển thị thông tin realtime của từng chỉ số
 // Khi đổi chỉ số sẽ unsub topic cũ và sub topic mới, cập nhật dữ liệu realtime
 export default function IndexCard({
@@ -37,18 +45,12 @@ export default function IndexCard({
   mid,
   down,
   sessionText,
+  timeLabels,
   onSymbolChange,
+  isSelected,
 }) {
-  // Map mã chỉ số sang topic socket tương ứng
-  const symbolToTopic = {
-    VNI: "KRXMDDS|IGI|STO|001",
-    VN30: "KRXMDDS|IGI|STO|101",
-    HNX: "KRXMDDS|IGI|STX|002",
-    UPCOM: "KRXMDDS|IGI|UPX|301",
-    HNX30: "KRXMDDS|IGI|STX|100",
-  };
   const [currentSymbol, setCurrentSymbol] = useState(symbolCode);
-  const topicRef = useRef(symbolToTopic[symbolCode]);
+  const topicRef = useRef(SYMBOL_TO_TOPIC[symbolCode]);
 
   // Handler cập nhật dữ liệu realtime cho card
   const [displayUp, setDisplayUp] = useState(up);
@@ -99,7 +101,7 @@ export default function IndexCard({
 
   // Khi currentSymbol đổi sẽ tự động unsub topic cũ và sub topic mới
   useEffect(() => {
-    const topic = symbolToTopic[currentSymbol];
+    const topic = SYMBOL_TO_TOPIC[currentSymbol];
     if (!topic) return;
     subscribeStream(topic, socketHandler);
     topicRef.current = topic;
@@ -138,7 +140,9 @@ export default function IndexCard({
     setCurrentSymbol(newSymbolCode);
     setDisplayTitle(newTitle);
     setShowDropdown(false);
-    if (onSymbolChange) onSymbolChange(newSymbolCode);
+    if (onSymbolChange) {
+      onSymbolChange(newSymbolCode);
+    }
   };
 
   // Xử lý hover data từ chart
@@ -169,7 +173,9 @@ export default function IndexCard({
         volumeData={volume}
         reference={reference}
         symbolCode={symbolCode}
+        timeLabels={timeLabels}
         onHoverData={handleHoverData}
+        isSelected={isSelected}
       />
 
       {/* Hiển thị dữ liệu khi hover */}
