@@ -12,3 +12,11 @@ export function formatValueBillion(value) {
     maximumFractionDigits: 2,
   });
 }
+
+export function formatPrice(price) {
+  if (price === undefined || price === null) return "0";
+  return Number(price).toLocaleString("vi-VN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}

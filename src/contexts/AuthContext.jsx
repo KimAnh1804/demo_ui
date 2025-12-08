@@ -1,8 +1,14 @@
-import React, { createContext, useState, useCallback, useEffect } from "react";
+import React, {createContext, useState, useCallback, useEffect} from "react";
+import {
+  sendLoginRequest,
+  subscribeTradingResponse,
+  unsubscribeTradingResponse,
+  disconnectTradingSocket,
+} from "../services/socketTrading";
 
 export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({children}) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -27,42 +33,72 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
 
-    try {
-      // Tạm thời dùng hardcode (sau có thể thay bằng API call thực)
-      const validUsername = "admin";
-      const validPassword = "123456";
-
-      if (username === validUsername && password === validPassword) {
-        // Tạo token giả (trong thực tế sẽ từ server)
-        const fakeToken = `token_${Date.now()}_${Math.random().toString(36)}`;
-        const userData = {
-          id: 1,
-          username: username,
-          email: `${username}@yuanta.com.vn`,
-          name: "Admin User",
-        };
-
-        // Lưu vào localStorage
-        localStorage.setItem("authToken", fakeToken);
-        localStorage.setItem("authUser", JSON.stringify(userData));
-
-        // Update state
-        setToken(fakeToken);
-        setUser(userData);
-        setIsAuthenticated(true);
-
-        return { success: true, user: userData };
-      } else {
-        throw new Error("Tài khoản hoặc mật khẩu không đúng");
+    return new Promise((resolve) => {
+      if (!username || !password) {
+        const msg = "Vui lòng nhập tài khoản và mật khẩu";
+        setError(msg);
+        setLoading(false);
+        resolve({success: false, error: msg});
+        return;
       }
-    } catch (err) {
-      const errorMessage = err.message || "Đăng nhập thất bại";
-      setError(errorMessage);
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
+
+      let isHandled = false;
+
+      const clientSeq = sendLoginRequest(username, password);
+      console.log("Login request sent with ClientSeq:", clientSeq);
+
+      const handler = (data) => {
+        if (isHandled) return;
+        isHandled = true;
+        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+
+        console.log("Login response received:", data);
+
+        // Giả sử Result = 1 là thành công
+        if (data && String(data.Result) === "1") {
+          const userData = {
+            id: 1,
+            username: username,
+            email: `${username}@yuanta.com.vn`,
+            name: username,
+          };
+
+          // Tạo token giả (vì socket login thường dựa trên session)
+          const fakeToken = `token_${Date.now()}_${Math.random().toString(36)}`;
+
+          // Lưu vào localStorage
+          localStorage.setItem("authToken", fakeToken);
+          localStorage.setItem("authUser", JSON.stringify(userData));
+
+          // Update state
+          setToken(fakeToken);
+          setUser(userData);
+          setIsAuthenticated(true);
+          setLoading(false);
+
+          resolve({success: true, user: userData});
+        } else {
+          const msg = data.Message || "Đăng nhập thất bại";
+          setError(msg);
+          setLoading(false);
+          resolve({success: false, error: msg});
+        }
+      };
+
+      subscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+
+      // Timeout
+      setTimeout(() => {
+        if (!isHandled) {
+          isHandled = true;
+          unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+          const msg = "Hết thời gian chờ phản hồi từ server";
+          setError(msg);
+          setLoading(false);
+          resolve({success: false, error: msg});
+        }
+      }, 30000);
+    });
   }, []);
 
   // Hàm đăng xuất
@@ -73,6 +109,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     setError(null);
+    disconnectTradingSocket();
   }, []);
 
   // Hàm clear error

@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 const TRADING_CONFIG = {
   //ACCOUNT_CODE: "004C074529",
   ACCOUNT_CODE: "004C000503",
-  // PASSWORD: "0-=,7,;+?+O*:",
+  //PASSWORD: "0-=,7,;+?+O*:",
   //PASSWORD: "hello6",
   PASSWORD: "1,?+N.-.,,B*?",
   IP_PRIVATE: "192.168.1.113",
@@ -48,16 +48,7 @@ export const initTradingSocket = () => {
 
   tradingSocket.on("connect", () => {
     isConnected = true;
-    console.log("Trading socket connected");
-
-    // Auto login sau khi kết nối
-    setTimeout(() => {
-      sendLoginRequest(
-        TRADING_CONFIG.ACCOUNT_CODE,
-        TRADING_CONFIG.PASSWORD,
-        TRADING_CONFIG.IP_PRIVATE
-      );
-    }, 1000);
+    console.log("Trading socket connected successfully");
   });
 
   // Lắng nghe sự kiện ngắt kết nối
@@ -74,9 +65,34 @@ export const initTradingSocket = () => {
     console.error("Socket error:", err.message);
   });
 
-  // Lắng nghe REQ_MSG echo
-  tradingSocket.on("REQ_MSG", (data) => {
-    console.log("REQ_MSG sent");
+  // Lắng nghe RES_MSG
+  tradingSocket.on("RES_MSG", (data) => {
+    console.log("Received RES_MSG:", data);
+    let parsedData = data;
+    if (typeof data === "string") {
+      try {
+        parsedData = JSON.parse(data);
+      } catch (e) {
+        console.error("Error parsing RES_MSG", e);
+        return;
+      }
+    }
+
+    // Route data based on ServiceName
+    if (parsedData && parsedData.ServiceName) {
+      console.log("Routing service:", parsedData.ServiceName);
+      routeDataToHandlers(parsedData.ServiceName, parsedData);
+    } 
+    
+    // Route data based on ClientSeq
+    if (parsedData && parsedData.ClientSeq) {
+      console.log("Routing ClientSeq:", parsedData.ClientSeq);
+      routeDataToHandlers(`SEQ_${parsedData.ClientSeq}`, parsedData);
+    }
+    
+    if (!parsedData.ServiceName && !parsedData.ClientSeq) {
+      console.warn("RES_MSG missing ServiceName and ClientSeq", parsedData);
+    }
   });
 
   return tradingSocket;
@@ -86,10 +102,14 @@ export const initTradingSocket = () => {
 export const sendTradingRequest = (payload) => {
   const socket = initTradingSocket();
 
+  console.log("Sending REQ_MSG:", payload.ServiceName);
+
   if (!socket.connected) {
+    console.log("Socket not connected, waiting...");
     return new Promise((resolve) => {
       socket.once("connect", () => {
         setTimeout(() => {
+          console.log("Socket connected, emitting REQ_MSG");
           socket.emit("REQ_MSG", JSON.stringify(payload));
           resolve(true);
         }, 500);
@@ -106,9 +126,10 @@ export const sendLoginRequest = (
   password = TRADING_CONFIG.PASSWORD,
   ipPrivate = TRADING_CONFIG.IP_PRIVATE
 ) => {
+  const clientSeq = getNextClientSeq();
   const loginPayload = {
     CltVersion: "3.1.0",
-    ClientSeq: getNextClientSeq(),
+    ClientSeq: clientSeq,
     SecCode: TRADING_CONFIG.SEC_CODE,
     WorkerName: TRADING_CONFIG.WORKER_NAME,
     ServiceName: "FOSxID02_Login",
@@ -157,7 +178,8 @@ export const sendLoginRequest = (
     SessionID: "",
   };
 
-  return sendTradingRequest(loginPayload);
+  sendTradingRequest(loginPayload);
+  return clientSeq;
 };
 
 // Đăng ký handler
