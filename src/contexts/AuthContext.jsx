@@ -4,6 +4,7 @@ import {
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   disconnectTradingSocket,
+  initTradingSocket,
 } from "../services/socketTrading";
 
 export const AuthContext = createContext(null);
@@ -34,6 +35,15 @@ export const AuthProvider = ({children}) => {
     setError(null);
 
     return new Promise((resolve) => {
+      // 1. Kiểm tra mạng trước khi gửi request
+      if (!navigator.onLine) {
+        const msg = "Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền.";
+        setError(msg);
+        setLoading(false);
+        resolve({success: false, error: msg});
+        return;
+      }
+
       if (!username || !password) {
         const msg = "Vui lòng nhập tài khoản và mật khẩu";
         setError(msg);
@@ -44,6 +54,30 @@ export const AuthProvider = ({children}) => {
 
       let isHandled = false;
 
+      // Lấy socket để lắng nghe sự kiện disconnect
+      const socket = initTradingSocket();
+
+      // Hàm xử lý khi mất kết nối
+      const handleNetworkError = () => {
+        if (isHandled) return;
+        isHandled = true;
+
+        // Cleanup
+        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+        socket.off("disconnect", handleNetworkError);
+        window.removeEventListener("offline", handleNetworkError);
+
+        const msg = "Mất kết nối trong quá trình đăng nhập. Vui lòng thử lại.";
+        console.log(msg);
+        setError(msg);
+        setLoading(false);
+        resolve({success: false, error: msg});
+      };
+
+      // Lắng nghe sự kiện
+      socket.once("disconnect", handleNetworkError);
+      window.addEventListener("offline", handleNetworkError);
+
       const clientSeq = sendLoginRequest(username, password);
       console.log("Login request sent with ClientSeq:", clientSeq);
 
@@ -51,6 +85,10 @@ export const AuthProvider = ({children}) => {
         if (isHandled) return;
         isHandled = true;
         unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+
+        // Cleanup listeners
+        socket.off("disconnect", handleNetworkError);
+        window.removeEventListener("offline", handleNetworkError);
 
         console.log("Login response received:", data);
 
@@ -92,6 +130,11 @@ export const AuthProvider = ({children}) => {
         if (!isHandled) {
           isHandled = true;
           unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+
+          // Cleanup listeners
+          socket.off("disconnect", handleNetworkError);
+          window.removeEventListener("offline", handleNetworkError);
+
           const msg = "Hết thời gian chờ phản hồi từ server";
           setError(msg);
           setLoading(false);
@@ -139,3 +182,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

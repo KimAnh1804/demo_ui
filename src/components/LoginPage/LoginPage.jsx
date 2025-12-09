@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import React, {useState} from "react";
+import {useAuth} from "../../contexts/AuthContext";
 import "./LoginPage.scss";
 import logo from "../../assets/logo-ysvn-light.05dae14283a8b82a75f930de6e006060.svg";
 import nen from "../../assets/nen.jpg";
-import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
-import { GrDocumentPerformance } from "react-icons/gr";
-import { MdTipsAndUpdates, MdOutlineSecurity } from "react-icons/md";
-import { BsFillDatabaseFill } from "react-icons/bs";
-import { FaRegCalendarAlt } from "react-icons/fa";
-import { HiOutlineDocumentSearch } from "react-icons/hi";
+import {AiFillEyeInvisible, AiFillEye} from "react-icons/ai";
+import {GrDocumentPerformance} from "react-icons/gr";
+import {MdTipsAndUpdates, MdOutlineSecurity} from "react-icons/md";
+import {BsFillDatabaseFill} from "react-icons/bs";
+import {FaRegCalendarAlt} from "react-icons/fa";
+import {HiOutlineDocumentSearch} from "react-icons/hi";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login, error, clearError } = useAuth();
+  const {login, error, clearError} = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -28,47 +28,62 @@
     white-space: nowrap;
   }
 
-  /* Specific column alignments */
-  td:first-child {
-    /* Symbol */
+  .symbol-cell {
+
     text-align: left;
     font-weight: bold;
   }
 
-  /* Colors */
+  .drag-handle-cell {
+    text-align: center;
+    cursor: grab;
+    color: #888;
+    vertical-align: middle;
+    width: 30px;
+
+
+    img {
+      width: 20px;
+      height: 20px;
+      filter: brightness(0) invert(1);
+      display: flex;
+      justify-content: left;
+
+
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
   .text-ceiling {
     color: #d630e4;
   }
 
-  /* Purple */
   .text-floor {
     color: #00c5c5;
   }
 
-  /* Cyan */
   .text-ref {
     color: #ffd700;
   }
 
-  /* Yellow */
   .text-up {
     color: #0f0;
   }
 
-  /* Green */
   .text-down {
     color: #ff3333;
   }
 
-  /* Red */
 
-  /* Highlight match columns */
   .match-cell {
     background-color: #2a2a2a;
     font-weight: bold;
   }
 
-  /* Hover effect */
+
   tbody tr:hover {
     background-color: #262626;
   }

@@ -2,6 +2,24 @@ import React, {useState} from "react";
 import "./StockTable.scss";
 import {formatVolume, formatPrice} from "../../utils/format";
 import {MOCK_DATA} from "../../data/mockStockData";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from "@dnd-kit/core";
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
+import ka from "../../assets/ka.svg";
+
 
 // Xác định màu sắc của giá
 const getPriceClass = (price, ref, ceiling, floor) => {
@@ -15,10 +33,33 @@ const getPriceClass = (price, ref, ceiling, floor) => {
 
 
 const StockRow = React.memo(({stock}) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({id: stock.symbol});
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        // Khi đang drag thì làm mờ row đang được kéo đi một chút
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 999 : "auto",
+        cursor: 'auto',
+    };
+
     const matchClass = getPriceClass(stock.match.price, stock.ref, stock.ceiling, stock.floor);
 
     return (
-        <tr>
+        <tr ref={setNodeRef} style={style}>
+            {/* Drag Handle Column */}
+            <td className="drag-handle-cell" {...attributes} {...listeners}>
+                <img src={ka} alt="ka" />
+            </td>
+
             <td className={`symbol-cell ${matchClass}`}>{stock.symbol}</td>
             <td className="text-ceiling">{formatPrice(stock.ceiling)}</td>
             <td className="text-floor">{formatPrice(stock.floor)}</td>
@@ -65,62 +106,95 @@ const StockRow = React.memo(({stock}) => {
 export default function StockTable() {
     const [stocks, setStocks] = useState(MOCK_DATA);
 
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event) => {
+        const {active, over} = event;
+
+        if (active.id !== over.id) {
+            setStocks((items) => {
+                const oldIndex = items.findIndex((item) => item.symbol === active.id);
+                const newIndex = items.findIndex((item) => item.symbol === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
+
     return (
         <div className="stock-table-container">
-            <table className="stock-table">
-                <thead>
-                    <tr className="header-row-1">
-                        <th rowSpan={2}>Mã CK</th>
-                        <th rowSpan={2}>Trần</th>
-                        <th rowSpan={2}>Sàn</th>
-                        <th rowSpan={2}>TC</th>
-                        <th colSpan={6}>Thông tin dư mua</th>
-                        <th colSpan={4}>Khớp lệnh</th>
-                        <th colSpan={6}>Thông tin dư bán</th>
-                        <th rowSpan={2}>Tổng KL</th>
-                        <th colSpan={4}>Giá</th>
-                        <th colSpan={2}>Nhà ĐTNN</th>
-                    </tr>
-                    <tr className="header-row-2">
-                        {/* Dư mua */}
-                        <th>Giá 3</th>
-                        <th>KL 3</th>
-                        <th>Giá 2</th>
-                        <th>KL 2</th>
-                        <th>Giá 1</th>
-                        <th>KL 1</th>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <table className="stock-table">
+                    <thead>
+                        <tr className="header-row-1">
+                            {/* Cột handle drag */}
+                            <th rowSpan={2} style={{width: '30px'}}></th>
 
-                        {/* Khớp lệnh */}
-                        <th>Giá</th>
-                        <th>KL</th>
-                        <th>+/-</th>
-                        <th>%</th>
+                            <th rowSpan={2}>Mã CK</th>
+                            <th rowSpan={2}>Trần</th>
+                            <th rowSpan={2}>Sàn</th>
+                            <th rowSpan={2}>TC</th>
+                            <th colSpan={6}>Thông tin dư mua</th>
+                            <th colSpan={4}>Khớp lệnh</th>
+                            <th colSpan={6}>Thông tin dư bán</th>
+                            <th rowSpan={2}>Tổng KL</th>
+                            <th colSpan={4}>Giá</th>
+                            <th colSpan={2}>Nhà ĐTNN</th>
+                        </tr>
+                        <tr className="header-row-2">
+                            {/* Dư mua */}
+                            <th>Giá 3</th>
+                            <th>KL 3</th>
+                            <th>Giá 2</th>
+                            <th>KL 2</th>
+                            <th>Giá 1</th>
+                            <th>KL 1</th>
 
-                        {/* Dư bán */}
-                        <th>Giá 1</th>
-                        <th>KL 1</th>
-                        <th>Giá 2</th>
-                        <th>KL 2</th>
-                        <th>Giá 3</th>
-                        <th>KL 3</th>
+                            {/* Khớp lệnh */}
+                            <th>Giá</th>
+                            <th>KL</th>
+                            <th>+/-</th>
+                            <th>%</th>
 
-                        {/* Giá */}
-                        <th>TB</th>
-                        <th>Thấp</th>
-                        <th>Cao</th>
-                        <th>Mở cửa</th>
+                            {/* Dư bán */}
+                            <th>Giá 1</th>
+                            <th>KL 1</th>
+                            <th>Giá 2</th>
+                            <th>KL 2</th>
+                            <th>Giá 3</th>
+                            <th>KL 3</th>
 
-                        {/* ĐTNN */}
-                        <th>Mua</th>
-                        <th>Bán</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stocks.map((stock) => (
-                        <StockRow key={stock.symbol} stock={stock} />
-                    ))}
-                </tbody>
-            </table>
+                            {/* Giá */}
+                            <th>TB</th>
+                            <th>Thấp</th>
+                            <th>Cao</th>
+                            <th>Mở cửa</th>
+
+                            {/* ĐTNN */}
+                            <th>Mua</th>
+                            <th>Bán</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <SortableContext
+                            items={stocks.map(s => s.symbol)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {stocks.map((stock) => (
+                                <StockRow key={stock.symbol} stock={stock} />
+                            ))}
+                        </SortableContext>
+                    </tbody>
+                </table>
+            </DndContext>
         </div>
     );
 }
