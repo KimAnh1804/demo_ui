@@ -1,13 +1,19 @@
-import React, {useState, useEffect, useCallback} from "react";
-import {IndexCard, IndexChart, MainTable, StockTable, TopMenu} from "./components";
-import {useAuth} from "./contexts/AuthContext";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  IndexCard,
+  IndexChart,
+  MainTable,
+  StockTable,
+  TopMenu,
+} from "./components";
+import { useAuth } from "./contexts/AuthContext";
 import websocket, {
   subscribeStream,
   unsubscribeStream,
   subscribeIntradayTopic,
   unsubscribeIntradayTopic,
 } from "./services/socketStream";
-import {formatVolume, formatValueBillion} from "./utils/format";
+import { formatVolume, formatValueBillion } from "./utils/format";
 import "./AppMain.scss";
 
 // Danh sách các topic socket cho từng chỉ số
@@ -58,7 +64,7 @@ const SESSION_MAP = {
 };
 
 export function MainApp() {
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
 
   function getSessionText(t336) {
     if (!t336) return "";
@@ -86,20 +92,20 @@ export function MainApp() {
       prev.map((config) =>
         config.symbolCode === indexName
           ? {
-            ...config,
-            price: price.toLocaleString("vi-VN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-            change: parseFloat(change),
-            percent: parseFloat(percent),
-            volumeText: formatVolume(volume),
-            valueText: formatValueBillion(value),
-            up: up !== undefined ? `${up}(${t30589})` : config.up,
-            mid: mid !== undefined ? `${mid}` : config.mid,
-            down: down !== undefined ? `${down}(${t30593})` : config.down,
-            sessionText: sessionText || config.sessionText,
-          }
+              ...config,
+              price: price.toLocaleString("vi-VN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+              change: parseFloat(change),
+              percent: parseFloat(percent),
+              volumeText: formatVolume(volume),
+              valueText: formatValueBillion(value),
+              up: up !== undefined ? `${up}(${t30589})` : config.up,
+              mid: mid !== undefined ? `${mid}` : config.mid,
+              down: down !== undefined ? `${down}(${t30593})` : config.down,
+              sessionText: sessionText || config.sessionText,
+            }
           : config
       )
     );
@@ -109,19 +115,19 @@ export function MainApp() {
       prev.map((item) =>
         item.name === indexName
           ? {
-            ...item,
-            price: price,
-            change: parseFloat(change),
-            percent: parseFloat(percent),
-            volume:
-              volume !== undefined
-                ? parseFloat((volume / 1000000).toFixed(2))
-                : item.volume,
-            value: value !== undefined ? value : item.value,
-            up: up !== undefined ? up : item.up,
-            mid: mid !== undefined ? mid : item.mid,
-            down: down !== undefined ? down : item.down,
-          }
+              ...item,
+              price: price,
+              change: parseFloat(change),
+              percent: parseFloat(percent),
+              volume:
+                volume !== undefined
+                  ? parseFloat((volume / 1000000).toFixed(2))
+                  : item.volume,
+              value: value !== undefined ? value : item.value,
+              up: up !== undefined ? up : item.up,
+              mid: mid !== undefined ? mid : item.mid,
+              down: down !== undefined ? down : item.down,
+            }
           : item
       )
     );
@@ -166,7 +172,7 @@ export function MainApp() {
   // Đăng ký tất cả intraday topics khi mount để cập nhật realtime chart cho tất cả symbol
   useEffect(() => {
     const subscribeAllIntradayTopics = () => {
-      TOPIC_CONFIGS.forEach(({symbol, intraday}) => {
+      TOPIC_CONFIGS.forEach(({ symbol, intraday }) => {
         subscribeIntradayTopic(intraday, {
           onHistRes: (data, receivedTopic) => {
             let responseData = data;
@@ -200,7 +206,7 @@ export function MainApp() {
 
               // Lưu trữ toàn bộ dữ liệu
               setIntradayData((prev) => {
-                const updated = {...prev, [targetSymbol]: dataArray};
+                const updated = { ...prev, [targetSymbol]: dataArray };
                 return updated;
               });
 
@@ -237,7 +243,7 @@ export function MainApp() {
                   // Cập nhật chart với dữ liệu mới
                   updateChartFromIntraday(updated, targetSymbol);
 
-                  return {...prev, [targetSymbol]: updated};
+                  return { ...prev, [targetSymbol]: updated };
                 }
                 return prev;
               });
@@ -281,7 +287,7 @@ export function MainApp() {
   // Đăng ký tất cả realtime topics khi mount để cập nhật price/volume/up/down/mid realtime cho tất cả card
   useEffect(() => {
     const subscribeAllRealtimeTopics = () => {
-      TOPIC_CONFIGS.forEach(({symbol, topic}) => {
+      TOPIC_CONFIGS.forEach(({ symbol, topic }) => {
         const handler = (data) => handleIndexUpdate(data, symbol);
         subscribeStream(topic, handler);
       });
@@ -291,7 +297,7 @@ export function MainApp() {
 
     return () => {
       // Cleanup: unsubscribe tất cả
-      TOPIC_CONFIGS.forEach(({topic}) => {
+      TOPIC_CONFIGS.forEach(({ topic }) => {
         unsubscribeStream(topic);
       });
     };

@@ -1,12 +1,9 @@
 import { io } from "socket.io-client";
+import { encryptString } from "../utils/encryption";
 
-// Cấu hình kết nối trading socket
 const TRADING_CONFIG = {
-  //ACCOUNT_CODE: "004C074529",
   ACCOUNT_CODE: "004C000503",
-  //PASSWORD: "0-=,7,;+?+O*:",
-  //PASSWORD: "hello6",
-  PASSWORD: "1,?+N.-.,,B*?",
+  PASSWORD: "hello6",
   IP_PRIVATE: "192.168.1.113",
   SEC_CODE: "004",
   WORKER_NAME: "FOSxID02",
@@ -14,19 +11,16 @@ const TRADING_CONFIG = {
   MW_LOGIN_PSWD: ",+A,3-)-C.*,6,9,=+F*K.N*M.=+)+J,004",
 };
 
-// Biến lưu trữ kết nối socket trading
 let tradingSocket = null;
 let isConnected = false;
-let clientSeq = 0; // Sequence counter - tăng dần mỗi request
+let clientSeq = 0;
 const tradingHandlers = new Map();
 
-// Hàm lấy ClientSeq tăng dần
 const getNextClientSeq = () => {
   clientSeq += 1;
   return clientSeq;
 };
 
-// Khởi tạo kết nối socket trading
 export const initTradingSocket = () => {
   if (tradingSocket) {
     if (!tradingSocket.connected && !tradingSocket.connecting) {
@@ -35,7 +29,6 @@ export const initTradingSocket = () => {
     return tradingSocket;
   }
 
-  // Tạo kết nối mới
   tradingSocket = io("https://ysflex-uat.ysvn.com.vn/", {
     path: "/services",
     transports: ["websocket"],
@@ -48,13 +41,10 @@ export const initTradingSocket = () => {
 
   tradingSocket.on("connect", () => {
     isConnected = true;
-    console.log("Trading socket connected successfully");
   });
 
-  // Lắng nghe sự kiện ngắt kết nối
-  tradingSocket.on("disconnect", (reason) => {
+  tradingSocket.on("disconnect", () => {
     isConnected = false;
-    console.log("Trading socket disconnected:", reason);
   });
 
   tradingSocket.on("connect_error", (err) => {
@@ -65,9 +55,7 @@ export const initTradingSocket = () => {
     console.error("Socket error:", err.message);
   });
 
-  // Lắng nghe RES_MSG
   tradingSocket.on("RES_MSG", (data) => {
-    console.log("Received RES_MSG:", data);
     let parsedData = data;
     if (typeof data === "string") {
       try {
@@ -78,18 +66,14 @@ export const initTradingSocket = () => {
       }
     }
 
-    // Route data based on ServiceName
-    if (parsedData && parsedData.ServiceName) {
-      console.log("Routing service:", parsedData.ServiceName);
+    if (parsedData?.ServiceName) {
       routeDataToHandlers(parsedData.ServiceName, parsedData);
-    } 
-    
-    // Route data based on ClientSeq
-    if (parsedData && parsedData.ClientSeq) {
-      console.log("Routing ClientSeq:", parsedData.ClientSeq);
+    }
+
+    if (parsedData?.ClientSeq) {
       routeDataToHandlers(`SEQ_${parsedData.ClientSeq}`, parsedData);
     }
-    
+
     if (!parsedData.ServiceName && !parsedData.ClientSeq) {
       console.warn("RES_MSG missing ServiceName and ClientSeq", parsedData);
     }
@@ -98,18 +82,13 @@ export const initTradingSocket = () => {
   return tradingSocket;
 };
 
-// Gửi REQ_MSG request
 export const sendTradingRequest = (payload) => {
   const socket = initTradingSocket();
 
-  console.log("Sending REQ_MSG:", payload.ServiceName);
-
   if (!socket.connected) {
-    console.log("Socket not connected, waiting...");
     return new Promise((resolve) => {
       socket.once("connect", () => {
         setTimeout(() => {
-          console.log("Socket connected, emitting REQ_MSG");
           socket.emit("REQ_MSG", JSON.stringify(payload));
           resolve(true);
         }, 500);
@@ -127,6 +106,8 @@ export const sendLoginRequest = (
   ipPrivate = TRADING_CONFIG.IP_PRIVATE
 ) => {
   const clientSeq = getNextClientSeq();
+  const encryptedPassword = encryptString(password);
+
   const loginPayload = {
     CltVersion: "3.1.0",
     ClientSeq: clientSeq,
@@ -144,7 +125,7 @@ export const sendLoginRequest = (
     InVal: [
       "login",
       accountCode,
-      password,
+      encryptedPassword,
       "",
       "",
       "N",
@@ -182,7 +163,52 @@ export const sendLoginRequest = (
   return clientSeq;
 };
 
-// Đăng ký handler
+export const sendOTPVerificationRequest = (otp) => {
+  const clientSeq = getNextClientSeq();
+  const encryptedOTP = encryptString(otp);
+
+  const otpPayload = {
+    CltVersion: "3.1.0",
+    ClientSeq: clientSeq,
+    SecCode: TRADING_CONFIG.SEC_CODE,
+    WorkerName: "FOSxID01",
+    ServiceName: "FOSxID01_OTPManagement",
+    TimeOut: 15,
+    MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,
+    MWLoginPswd: TRADING_CONFIG.MW_LOGIN_PSWD,
+    AppLoginID: "0000290095",
+    AppLoginPswd: "",
+    ClientSentTime: "0",
+    Lang: "VI",
+    MdmTp: "02",
+    InVal: ["manual_otp"],
+    TotInVal: 1,
+    AprStat: "N",
+    Operation: "I",
+    CustMgnBrch: "",
+    CustMgnAgc: "",
+    BrkMgnBrch: "",
+    BrkMgnAgc: "",
+    LoginBrch: "",
+    LoginAgnc: "",
+    AprSeq: "",
+    MakerDt: "",
+    AprIP: "",
+    AprID: "",
+    AprAmt: "",
+    IPPrivate: TRADING_CONFIG.IP_PRIVATE,
+    Otp: encryptedOTP,
+    AcntNo: "",
+    SubNo: "",
+    BankCd: "",
+    PCName: "",
+    SessionID: "",
+  };
+
+  sendTradingRequest(otpPayload);
+  return clientSeq;
+};
+
 export const subscribeTradingResponse = (messageType, handler) => {
   if (!tradingHandlers.has(messageType)) {
     tradingHandlers.set(messageType, []);
@@ -194,7 +220,6 @@ export const subscribeTradingResponse = (messageType, handler) => {
   };
 };
 
-// Xóa handler
 export const unsubscribeTradingResponse = (messageType, handler) => {
   const handlers = tradingHandlers.get(messageType);
   if (handlers) {
@@ -205,7 +230,6 @@ export const unsubscribeTradingResponse = (messageType, handler) => {
   }
 };
 
-// Route data
 const routeDataToHandlers = (messageType, data) => {
   const handlers = tradingHandlers.get(messageType);
   if (handlers && handlers.length > 0) {
@@ -233,6 +257,7 @@ export default {
   initTradingSocket,
   sendTradingRequest,
   sendLoginRequest,
+  sendOTPVerificationRequest,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   getTradingSocketStatus,

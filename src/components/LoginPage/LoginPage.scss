@@ -59,15 +59,11 @@ $white: #ffffff;
 }
 
 .login-box {
-  //background: #bdc3c7;
-  //border-radius: 16px;
-  // box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   padding: 48px 40px;
   width: 100%;
   max-width: 420px;
   z-index: 10;
   position: relative;
-  // backdrop-filter: blur(10px);
   background: transparent !important;
   box-shadow: none !important;
   border: none !important;
@@ -130,7 +126,7 @@ h1 {
   color: white;
   font-style: normal;
   font-family: Roboto, sans-serif;
-  white-space: nowrap; // để không bị xuống dòng
+  white-space: nowrap;
 }
 
 .login-form {
@@ -193,7 +189,7 @@ h1 {
   font-size: 18px;
   pointer-events: auto;
   cursor: pointer;
-  color: white;
+  color: black;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -398,13 +394,8 @@ h1 {
   }
 }
 
-// Responsive Design
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .login-box {
-    // padding: 32px 24px;
-    // background: rgba(255, 255, 255, 0.15);
-    // backdrop-filter: blur(16px);
-    // border: 1px solid rgba(255, 255, 255, 0.2);
     width: 420px;
     padding: 0;
   }

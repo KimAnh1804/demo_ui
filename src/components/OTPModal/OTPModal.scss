@@ -1,0 +1,341 @@
+$primary-orange: #b8622f;
+$primary-orange-hover: #9d5328;
+$dark-bg: rgba(0, 0, 0, 0.85);
+$modal-bg: #2a2a2a;
+$text-light: #ffffff;
+$text-gray: #b0b0b0;
+$border-color: #444;
+$input-bg: #1a1a1a;
+$error-color: #e74c3c;
+
+.otp-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $dark-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.otp-modal {
+  background: $modal-bg;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+
+  @media (max-width: 600px) {
+    max-width: 95%;
+    margin: 20px;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.otp-modal-header {
+  padding: 32px 32px 24px;
+  text-align: center;
+  border-bottom: 1px solid $border-color;
+
+  .otp-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 16px;
+    background: linear-gradient(135deg, $primary-orange, $primary-orange-hover);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: $text-light;
+    box-shadow: 0 4px 12px rgba(184, 98, 47, 0.3);
+  }
+
+  .otp-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: $text-light;
+    margin: 0;
+  }
+}
+
+.otp-modal-body {
+  padding: 32px;
+
+  .otp-description {
+    color: $text-gray;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 20px;
+    text-align: center;
+  }
+
+  .otp-countdown {
+    text-align: center;
+    margin-bottom: 28px;
+    font-size: 14px;
+    color: $text-gray;
+
+    strong {
+      color: $text-light;
+      font-weight: 600;
+    }
+
+    &.expired {
+      .expired-text {
+        color: $error-color;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .otp-input-group {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 8px;
+
+    .otp-label {
+      display: block;
+      color: $text-light;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .otp-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: $input-bg;
+      border: 1px solid $border-color;
+      border-radius: 6px;
+      color: $text-light;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      letter-spacing: 2px;
+      height: 50px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-orange;
+        box-shadow: 0 0 0 3px rgba(184, 98, 47, 0.15);
+      }
+
+      &::placeholder {
+        color: #555;
+      }
+    }
+  }
+
+  .otp-error {
+    color: $error-color;
+    font-size: 13px;
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+.otp-modal-footer {
+  padding: 0 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .otp-btn {
+    width: 100%;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &.otp-btn-verify {
+      background: linear-gradient(
+        135deg,
+        $primary-orange,
+        $primary-orange-hover
+      );
+      color: $text-light;
+      box-shadow: 0 4px 12px rgba(184, 98, 47, 0.3);
+
+      &:hover {
+        background: linear-gradient(
+          135deg,
+          $primary-orange-hover,
+          darken($primary-orange-hover, 5%)
+        );
+        box-shadow: 0 6px 16px rgba(184, 98, 47, 0.4);
+      }
+
+      &:active {
+        box-shadow: 0 2px 8px rgba(184, 98, 47, 0.3);
+      }
+    }
+
+    &.otp-btn-cancel {
+      background: transparent;
+      color: $text-gray;
+      border: 1px solid $border-color;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: $text-light;
+        border-color: lighten($border-color, 10%);
+      }
+    }
+
+    &.otp-btn-resend {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: $text-light;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #2980b9, #2471a3);
+        box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+      }
+
+      &:active {
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+      }
+    }
+  }
+}
+
+// Confirm Modal Styles
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.confirm-modal {
+  background: $modal-bg;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.3s ease-out;
+
+  @media (max-width: 600px) {
+    max-width: 90%;
+  }
+}
+
+.confirm-modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid $border-color;
+
+  h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-light;
+    text-align: center;
+  }
+}
+
+.confirm-modal-body {
+  padding: 24px;
+
+  p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: $text-gray;
+    text-align: center;
+  }
+}
+
+.confirm-modal-footer {
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 12px;
+
+  .confirm-btn {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+
+    &:active {
+      transform: translateY(1px);
+    }
+
+    &.confirm-btn-agree {
+      background: linear-gradient(
+        135deg,
+        $primary-orange,
+        $primary-orange-hover
+      );
+      color: $text-light;
+      box-shadow: 0 4px 12px rgba(184, 98, 47, 0.3);
+
+      &:hover {
+        background: linear-gradient(
+          135deg,
+          $primary-orange-hover,
+          darken($primary-orange-hover, 5%)
+        );
+        box-shadow: 0 6px 16px rgba(184, 98, 47, 0.4);
+      }
+    }
+
+    &.confirm-btn-cancel {
+      background: transparent;
+      color: $text-gray;
+      border: 1px solid $border-color;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: $text-light;
+        border-color: lighten($border-color, 10%);
+      }
+    }
+  }
+}

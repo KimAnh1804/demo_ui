@@ -1,42 +1,58 @@
-import React, {useState} from "react";
-import {useAuth} from "../../contexts/AuthContext";
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import "./LoginPage.scss";
 import logo from "../../assets/logo-ysvn-light.05dae14283a8b82a75f930de6e006060.svg";
 import nen from "../../assets/nen.jpg";
-import {AiFillEyeInvisible, AiFillEye} from "react-icons/ai";
-import {GrDocumentPerformance} from "react-icons/gr";
-import {MdTipsAndUpdates, MdOutlineSecurity} from "react-icons/md";
-import {BsFillDatabaseFill} from "react-icons/bs";
-import {FaRegCalendarAlt} from "react-icons/fa";
-import {HiOutlineDocumentSearch} from "react-icons/hi";
+import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import { GrDocumentPerformance } from "react-icons/gr";
+import { MdTipsAndUpdates, MdOutlineSecurity } from "react-icons/md";
+import { BsFillDatabaseFill } from "react-icons/bs";
+import { FaRegCalendarAlt } from "react-icons/fa";
+import { HiOutlineDocumentSearch } from "react-icons/hi";
+import OTPModal from "../OTPModal/OTPModal";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const {login, error, clearError} = useAuth();
+
+  const {
+    login,
+    error,
+    clearError,
+    requiresOTP,
+    otpCountdown,
+    otpMessage,
+    verifyOTP,
+    cancelOTP,
+    resendOTP,
+    enterGuestMode,
+  } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     clearError();
-
-    if (!username || !password) {
-      return;
-    }
+    if (!username || !password) return;
 
     setIsLoading(true);
-    const result = await login(username, password);
+    await login(username, password);
     setIsLoading(false);
+  };
 
-    if (!result.success) {
-      // Error sẽ được hiển thị từ error state
+  const handleVerifyOTP = async (otpCode) => {
+    const result = await verifyOTP(otpCode);
+    if (!result.success) console.error("OTP verification failed");
+  };
+
+  const handleCancelOTP = (shouldContinue) => {
+    if (shouldContinue === false) {
+      cancelOTP();
+      enterGuestMode();
     }
   };
 
-  const handleInputChange = () => {
-    clearError();
-  };
+  const handleResendOTP = () => resendOTP?.();
 
   return (
     <div className="login-container">
@@ -181,6 +197,16 @@ export default function LoginPage() {
           </a>
         </div>
       </div>
+
+      {/* OTP Modal */}
+      <OTPModal
+        isOpen={requiresOTP} // Hiển thị modal OTP
+        onVerify={handleVerifyOTP} // Xử lý xác thực OTP
+        onCancel={handleCancelOTP}
+        onResendOTP={handleResendOTP} // Xử lý gửi lại OTP
+        countdown={otpCountdown}
+        otpMessage={otpMessage}
+      />
     </div>
   );
 }
