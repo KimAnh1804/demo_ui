@@ -3,9 +3,14 @@
   overflow-x: auto;
   background-color: #121212;
   color: #d9d9d9;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   border-radius: 4px;
   margin-top: 1rem;
+
+  @media (max-width: 768px) {
+    margin-top: 0.5rem;
+    border-radius: 0;
+  }
 }
 
 .stock-table {
@@ -13,11 +18,24 @@
   border-collapse: collapse;
   font-size: 13px;
 
+  @media (max-width: 768px) {
+    font-size: 11px;
+    min-width: 600px; // Enable horizontal scroll
+  }
+
+  @media (max-width: 480px) {
+    font-size: 10px;
+  }
+
   th,
   td {
     padding: 6px 4px;
     text-align: right;
     border: 1px solid #333;
+
+    @media (max-width: 768px) {
+      padding: 4px 2px;
+    }
   }
 
   th {
@@ -29,7 +47,6 @@
   }
 
   .symbol-cell {
-
     text-align: left;
     font-weight: bold;
   }
@@ -41,15 +58,12 @@
     vertical-align: middle;
     width: 30px;
 
-
     img {
       width: 20px;
       height: 20px;
       filter: brightness(0) invert(1);
       display: flex;
       justify-content: left;
-
-
     }
 
     &:active {
@@ -77,12 +91,10 @@
     color: #ff3333;
   }
 
-
   .match-cell {
     background-color: #2a2a2a;
     font-weight: bold;
   }
-
 
   tbody tr:hover {
     background-color: #262626;

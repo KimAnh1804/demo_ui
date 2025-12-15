@@ -1,0 +1,164 @@
+.watchlist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 24px;
+}
+
+.watchlist-modal {
+  background: #1a1a1a;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 20px 24px;
+  margin: 0;
+  border-bottom: 1px solid #444;
+  text-align: center;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-message {
+  padding: 24px;
+  text-align: center;
+  font-size: 16px;
+  color: #e0e0e0;
+}
+
+.warning-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-top: 24px;
+  color: #ffcc00;
+}
+
+.form-group {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #e0e0e0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 24px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #ff6b35;
+  }
+
+  .radio-label {
+    font-size: 14px;
+    color: #e0e0e0;
+    cursor: pointer;
+  }
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+
+  &:focus {
+    border-color: #ff6b35;
+  }
+
+  &::placeholder {
+    color: #666;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #444;
+  flex-direction: column;
+}
+
+.btn-submit,
+.btn-cancel {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-submit {
+  background: #ff6b35;
+  color: white;
+
+  &:active {
+    background: #e55a25;
+  }
+}
+
+.btn-submit-warning {
+  background: #dc3545;
+
+  &:hover {
+    background: #c82333;
+  }
+}
+
+.btn-cancel {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #ffffff;
+
+  &:hover {
+    border: 1px solid #ff6b35;
+  }
+
+  &:active {
+    background: #333;
+  }
+}

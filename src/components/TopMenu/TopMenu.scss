@@ -174,6 +174,43 @@
             .item-text {
               font-weight: 500;
             }
+
+            &.watchlist-item {
+              justify-content: space-between;
+              padding-right: 8px;
+
+              .watchlist-actions {
+                display: flex;
+                opacity: 0;
+                transition: opacity 0.2s;
+
+                button {
+                  background: transparent;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 16px;
+                  padding: 4px;
+                  border-radius: 3px;
+                  transition: all 0.2s;
+
+                  &.edit-btn {
+                    color: yellow;
+                    font-size: 20px;
+                    font-weight: bold;
+                  }
+
+                  &.delete-btn {
+                    color: red;
+                    font-size: 20px;
+                    font-weight: bold;
+                  }
+                }
+              }
+
+              &:hover .watchlist-actions {
+                opacity: 1;
+              }
+            }
           }
         }
       }
@@ -182,5 +219,152 @@
 
   .top-menu-right {
     display: none;
+  }
+}
+
+// Modal styles for edit and delete
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(1px);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content {
+  background: #2a2a2a;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.3s ease-out;
+  padding: 24px;
+  gap: 12px;
+
+  .warning-icon {
+    text-align: center;
+    font-size: 48px;
+    margin-bottom: 8px;
+    color: #fad416;
+  }
+
+  .modal-title {
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    text-align: center;
+    padding-bottom: 0;
+  }
+
+  .modal-message {
+    color: #b0b0b0;
+    text-align: center;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+
+  .modal-body {
+    .form-label {
+      display: block;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-input-modal {
+      width: 100%;
+      padding: 12px 16px;
+      background-color: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+
+      &:focus {
+        border-color: #f57c00;
+      }
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    border: none;
+
+    button {
+      padding: 12px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 120px;
+
+      &.btn-submit {
+        background: linear-gradient(135deg, #f57c00, #e65100);
+        color: white;
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(245, 124, 0, 0.4);
+          transform: translateY(-1px);
+        }
+      }
+
+      &.btn-submit-warning {
+        background: linear-gradient(135deg, #fad416, #fad416);
+        color: white;
+
+        &:hover {
+          box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+          transform: translateY(-1px);
+        }
+      }
+
+      &.btn-cancel {
+        background: transparent;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: #ffffff;
+          border-color: #666;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

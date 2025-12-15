@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
+import { TOPIC_CONFIGS } from "../configs/marketConfig";
 
 let socket = null;
 let isReady = false;
@@ -34,7 +35,7 @@ const initSocket = () => {
     flushPendingSubscriptions();
   });
 
-  socket.on("disconnect", (reason) => {
+  socket.on("disconnect", () => {
     isReady = false;
   });
 
@@ -93,9 +94,8 @@ const setupStreamListeners = () => {
     routeDataToHandlers(data);
   });
 
-  s.on("SUB_RES", (res) => {});
-
-  s.on("UNSUB_RES", (res) => {});
+  s.on("SUB_RES", () => {});
+  s.on("UNSUB_RES", () => {});
 };
 
 const routeDataToHandlers = (data) => {
@@ -153,7 +153,7 @@ export const subscribeStream = (topic, handler) => {
 
 // Hủy đăng ký nhận dữ liệu từ một topic cụ thể
 export const unsubscribeStream = (topic) => {
-  const s = initSocket();
+
 
   topicHandlers.delete(topic);
   subscribedTopics.delete(topic);
@@ -193,18 +193,14 @@ function emitHISTREQ(topicFull, clientSeq, transId) {
   };
   s.emit("HIST_REQ", payload);
 }
+
+
 // INTRADAY_1m realtime
-const INTRADAY_TOPICS = [
-  "INTRADAY_1m|STO|001",
-  "INTRADAY_1m|STO|101",
-  "INTRADAY_1m|STX|002",
-  "INTRADAY_1m|UPX|301",
-  "INTRADAY_1m|STX|100",
-];
+const INTRADAY_TOPICS = TOPIC_CONFIGS.map(c => c.intraday);
 const intradaySubscriptions = new Map(); // Lưu trữ subscriptions theo topic
 
 // Sub 1 topic với callback
-export function subscribeIntradayTopic(topic, { onHistRes, onFOSStream } = {}) {
+export function subscribeIntradayTopic(topic, { onHistRes } = {}) {
   if (!INTRADAY_TOPICS.includes(topic)) {
     console.warn("Topic không hợp lệ:", topic);
     return;
@@ -252,7 +248,7 @@ export function unsubscribeIntradayTopic(topic = null) {
   if (topic) {
     // Unsubscribe topic cụ thể
     if (intradaySubscriptions.has(topic)) {
-      const { handler } = intradaySubscriptions.get(topic);
+      const { handler: _handler } = intradaySubscriptions.get(topic);
       unsubscribeStream(topic);
       intradaySubscriptions.delete(topic);
     }

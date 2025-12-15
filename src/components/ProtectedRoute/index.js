@@ -1,1 +1,1 @@
-export { ProtectedRoute, default } from "./ProtectedRoute";
+export { ProtectedRoute } from "./ProtectedRoute";

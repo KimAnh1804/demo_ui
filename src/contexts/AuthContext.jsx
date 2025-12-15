@@ -1,7 +1,10 @@
-import React, { createContext, useState, useCallback, useEffect } from "react";
+import React, {createContext, useState, useCallback} from "react";
 import {
   sendLoginRequest,
   sendOTPVerificationRequest,
+  sendWrongOTP,
+  saveSessionID,
+  saveAppLoginID,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   disconnectTradingSocket,
@@ -10,181 +13,225 @@ import {
 
 export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const parseLoginData = (data) => {
+  try {
+    if (!data.Data) return {appLoginID: null, sessionId: null};
 
+    const parsedData = JSON.parse(data.Data);
+    if (!parsedData?.[0]) return {appLoginID: null, sessionId: null};
+
+    const appLoginID = parsedData[0].c1 || null;
+    const sessionId =
+      parsedData[0].c40 ||
+      parsedData[0].c41 ||
+      parsedData[0].c2 ||
+      parsedData[0].c3 ||
+      null;
+
+    return {appLoginID, sessionId};
+  } catch (e) {
+    console.error("Error parsing login Data:", e);
+    return {appLoginID: null, sessionId: null};
+  }
+};
+
+const createUserData = (username) => ({
+  id: 1,
+  username,
+  email: `${username}@yuanta.com.vn`,
+  name: username,
+});
+
+const generateToken = () => `token_${Date.now()}_${Math.random().toString(36)}`;
+
+const saveAuthToStorage = (token, user) => {
+  localStorage.setItem("authToken", token);
+  localStorage.setItem("authUser", JSON.stringify(user));
+};
+
+const clearAuthFromStorage = () => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("authUser");
+};
+
+
+export const AuthProvider = ({children}) => {
+  // State
+  const [token, setToken] = useState(() => localStorage.getItem("authToken"));
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("authUser");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("authToken"));
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [requiresOTP, setRequiresOTP] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
   const [otpSessionId, setOtpSessionId] = useState(null);
   const [pendingUsername, setPendingUsername] = useState(null);
   const [otpMessage, setOtpMessage] = useState("");
   const [isGuestMode, setIsGuestMode] = useState(false);
-  useEffect(() => {
-    const savedToken = localStorage.getItem("authToken");
-    const savedUser = localStorage.getItem("authUser");
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+
+
+
+  const requestOTP = useCallback((sessionId) => {
+    setTimeout(() => {
+      const otpSeq = sendOTPVerificationRequest(sessionId);
+      subscribeTradingResponse(`SEQ_${otpSeq}`, (otpData) => {
+        if (otpData?.Message) setOtpMessage(otpData.Message);
+        unsubscribeTradingResponse(`SEQ_${otpSeq}`);
+      });
+    }, 2000);
   }, []);
 
-  const login = useCallback(async (username, password) => {
-    setLoading(true);
-    setError(null);
 
-    return new Promise((resolve) => {
-      if (!navigator.onLine) {
-        const msg =
-          "Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền.";
-        setError(msg);
-        setLoading(false);
-        resolve({ success: false, error: msg });
-        return;
-      }
+  const login = useCallback(
+    async (username, password) => {
+      setLoading(true);
+      setError(null);
 
-      if (!username || !password) {
-        const msg = "Vui lòng nhập tài khoản và mật khẩu";
-        setError(msg);
-        setLoading(false);
-        resolve({ success: false, error: msg });
-        return;
-      }
-
-      let isHandled = false;
-
-      const socket = initTradingSocket();
-
-      const handleNetworkError = () => {
-        if (isHandled) return;
-        isHandled = true;
-
-        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
-        socket.off("disconnect", handleNetworkError);
-        window.removeEventListener("offline", handleNetworkError);
-
-        const msg = "Mất kết nối trong quá trình đăng nhập. Vui lòng thử lại.";
-        setError(msg);
-        setLoading(false);
-        resolve({ success: false, error: msg });
-      };
-
-      socket.once("disconnect", handleNetworkError);
-      window.addEventListener("offline", handleNetworkError);
-
-      const clientSeq = sendLoginRequest(username, password);
-
-      const handler = (data) => {
-        if (isHandled) return;
-        isHandled = true;
-        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
-
-        socket.off("disconnect", handleNetworkError);
-        window.removeEventListener("offline", handleNetworkError);
-
-        if (data && String(data.Result) === "1") {
-          const forceOTP = true;
-
-          if (
-            (data.RequiresOTP && String(data.RequiresOTP) === "") ||
-            forceOTP
-          ) {
-            setRequiresOTP(true);
-            setOtpCountdown(120);
-            setOtpSessionId(data.SessionId || clientSeq);
-            setPendingUsername(username);
-
-            // Set message ban đầu từ login response
-            setOtpMessage(
-              data.Message || "Vui lòng nhập mã OTP để hoàn tất đăng nhập"
-            );
-            setLoading(false);
-
-            setTimeout(() => {
-              const otpSeq = sendOTPVerificationRequest(
-                data.SessionId || clientSeq
-              );
-
-              const otpHandler = (otpData) => {
-                if (otpData?.Message) {
-                  setOtpMessage(otpData.Message);
-                }
-                unsubscribeTradingResponse(`SEQ_${otpSeq}`, otpHandler);
-              };
-
-              subscribeTradingResponse(`SEQ_${otpSeq}`, otpHandler);
-            }, 2000);
-
-            resolve({
-              success: true,
-              requiresOTP: true,
-              sessionId: data.SessionId || clientSeq,
-            });
-            return;
-          }
-
-          localStorage.setItem("authToken", fakeToken);
-          localStorage.setItem("authUser", JSON.stringify(userData));
-
-          setToken(fakeToken);
-          setUser(userData);
-          setIsAuthenticated(true);
-          setLoading(false);
-
-          resolve({ success: true, user: userData });
-        } else {
-          const msg = data.Message || "Đăng nhập thất bại";
+      return new Promise((resolve) => {
+        // Validation
+        if (!navigator.onLine) {
+          const msg =
+            "Không có kết nối mạng. Vui lòng kiểm tra lại đường truyền.";
           setError(msg);
           setLoading(false);
-          resolve({ success: false, error: msg });
+          return resolve({success: false, error: msg});
         }
-      };
 
-      subscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+        if (!username || !password) {
+          const msg = "Vui lòng nhập tài khoản và mật khẩu";
+          setError(msg);
+          setLoading(false);
+          return resolve({success: false, error: msg});
+        }
 
-      setTimeout(() => {
-        if (!isHandled) {
+        let isHandled = false;
+        const socket = initTradingSocket();
+        const clientSeq = sendLoginRequest(username, password);
+
+        // Network error handler
+        const handleNetworkError = () => {
+          if (isHandled) return;
           isHandled = true;
-          unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+          unsubscribeTradingResponse(`SEQ_${clientSeq}`);
+          socket.off("disconnect", handleNetworkError);
+          window.removeEventListener("offline", handleNetworkError);
 
+          const msg =
+            "Mất kết nối trong quá trình đăng nhập. Vui lòng thử lại.";
+          setError(msg);
+          setLoading(false);
+          resolve({success: false, error: msg});
+        };
+
+        socket.once("disconnect", handleNetworkError);
+        window.addEventListener("offline", handleNetworkError);
+
+        // Login response handler
+        const handler = (data) => {
+          if (isHandled) return;
+          isHandled = true;
+          unsubscribeTradingResponse(`SEQ_${clientSeq}`);
+          socket.off("disconnect", handleNetworkError);
+          window.removeEventListener("offline", handleNetworkError);
+
+          // Login failed
+          if (!data || String(data.Result) !== "1") {
+            const msg = data?.Message || "Đăng nhập thất bại";
+            setError(msg);
+            setLoading(false);
+            return resolve({success: false, error: msg});
+          }
+
+          // Login success - parse data
+          const {appLoginID, sessionId: parsedSessionId} =
+            parseLoginData(data);
+          if (appLoginID) saveAppLoginID(appLoginID);
+
+          const sessionId =
+            parsedSessionId ||
+            data.SessionId ||
+            data.SessionID ||
+            data.TransId ||
+            clientSeq;
+          if (sessionId) saveSessionID(sessionId);
+
+          // Setup OTP flow
+          setRequiresOTP(true);
+          setOtpCountdown(120);
+          setOtpSessionId(sessionId);
+          setPendingUsername(username);
+          setOtpMessage(
+            data.Message || "Vui lòng nhập mã OTP để hoàn tất đăng nhập"
+          );
+          setLoading(false);
+
+          requestOTP(sessionId);
+
+          resolve({
+            success: true,
+            requiresOTP: true,
+            sessionId,
+          });
+        };
+
+        subscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+
+        // Timeout
+        setTimeout(() => {
+          if (isHandled) return;
+          isHandled = true;
+          unsubscribeTradingResponse(`SEQ_${clientSeq}`);
           socket.off("disconnect", handleNetworkError);
           window.removeEventListener("offline", handleNetworkError);
 
           const msg = "Hết thời gian chờ phản hồi từ server";
           setError(msg);
           setLoading(false);
-          resolve({ success: false, error: msg });
-        }
-      }, 30000);
-    });
-  }, []);
+          resolve({success: false, error: msg});
+        }, 30000);
+      });
+    },
+    [requestOTP]
+  );
 
-  // Hàm xác thực OTP
+
   const verifyOTP = useCallback(
     async (otpCode) => {
       setLoading(true);
       setError(null);
 
       return new Promise((resolve) => {
-        setTimeout(() => {
-          const userData = {
-            id: 1,
-            username: pendingUsername,
-            email: `${pendingUsername}@yuanta.com.vn`,
-            name: pendingUsername,
-          };
+        const wrongOtpSeq = sendWrongOTP(otpCode);
 
-          const fakeToken = `token_${Date.now()}_${Math.random().toString(36)}`;
+        const wrongOtpHandler = (wrongOtpData) => {
+          unsubscribeTradingResponse(`SEQ_${wrongOtpSeq}`);
 
-          localStorage.setItem("authToken", fakeToken);
-          localStorage.setItem("authUser", JSON.stringify(userData));
+          if (wrongOtpData?.Message) setOtpMessage(wrongOtpData.Message);
 
-          setToken(fakeToken);
+          // OTP verification failed
+          if (!wrongOtpData || String(wrongOtpData.Result) !== "1") {
+            setLoading(false);
+            return resolve({
+              success: false,
+              error: wrongOtpData?.Message || "OTP không hợp lệ",
+            });
+          }
+
+          // OTP success - update SessionID from OTP response
+          if (wrongOtpData.TransId) {
+            saveSessionID(wrongOtpData.TransId);
+          }
+
+          // Create user session
+          const userData = createUserData(pendingUsername);
+          const newToken = generateToken();
+
+          saveAuthToStorage(newToken, userData);
+
+          setToken(newToken);
           setUser(userData);
           setIsAuthenticated(true);
           setRequiresOTP(false);
@@ -193,11 +240,24 @@ export const AuthProvider = ({ children }) => {
           setPendingUsername(null);
           setLoading(false);
 
-          resolve({ success: true, user: userData });
-        }, 1000);
+          resolve({success: true, user: userData});
+        };
+
+        subscribeTradingResponse(`SEQ_${wrongOtpSeq}`, wrongOtpHandler);
+
+        // Timeout
+        setTimeout(() => {
+          unsubscribeTradingResponse(`SEQ_${wrongOtpSeq}`);
+          if (loading) {
+            setLoading(false);
+            const msg = "Hết thời gian chờ xác thực OTP";
+            setOtpMessage(msg);
+            resolve({success: false, error: msg});
+          }
+        }, 15000);
       });
     },
-    [pendingUsername]
+    [pendingUsername, loading]
   );
 
   const cancelOTP = useCallback(() => {
@@ -208,6 +268,15 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, []);
 
+  const resendOTP = useCallback(() => {
+    if (!otpSessionId) return;
+
+    setOtpCountdown(120);
+    setError(null);
+    requestOTP(otpSessionId);
+  }, [otpSessionId, requestOTP]);
+
+
   const enterGuestMode = useCallback(() => {
     setIsGuestMode(true);
     setRequiresOTP(false);
@@ -217,29 +286,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, []);
 
-  const resendOTP = useCallback(() => {
-    if (otpSessionId) {
-      setOtpCountdown(120);
-      setError(null);
-
-      setTimeout(() => {
-        const otpSeq = sendOTPVerificationRequest(otpSessionId);
-
-        const otpHandler = (otpData) => {
-          if (otpData?.Message) {
-            setOtpMessage(otpData.Message);
-          }
-          unsubscribeTradingResponse(`SEQ_${otpSeq}`, otpHandler);
-        };
-
-        subscribeTradingResponse(`SEQ_${otpSeq}`, otpHandler);
-      }, 500);
-    }
-  }, [otpSessionId]);
-
   const logout = useCallback(() => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("authUser");
+    clearAuthFromStorage();
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
@@ -247,9 +295,8 @@ export const AuthProvider = ({ children }) => {
     disconnectTradingSocket();
   }, []);
 
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
+  const clearError = useCallback(() => setError(null), []);
+
 
   const value = {
     isAuthenticated,
@@ -274,11 +321,5 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook để sử dụng AuthContext
-export const useAuth = () => {
-  const context = React.useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth phải được dùng bên trong AuthProvider");
-  }
-  return context;
-};
+
+export const useAuth = () => React.useContext(AuthContext);

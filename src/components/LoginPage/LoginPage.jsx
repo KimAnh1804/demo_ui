@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   const handleVerifyOTP = async (otpCode) => {
     const result = await verifyOTP(otpCode);
-    if (!result.success) console.error("OTP verification failed");
+    if (!result.success) return;
   };
 
   const handleCancelOTP = (shouldContinue) => {
@@ -86,7 +86,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  handleInputChange();
+                  clearError();
                 }}
                 disabled={isLoading}
                 autoFocus
@@ -109,7 +109,7 @@ export default function LoginPage() {
                 maxLength={82}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  handleInputChange();
+                  clearError();
                 }}
                 disabled={isLoading}
               />

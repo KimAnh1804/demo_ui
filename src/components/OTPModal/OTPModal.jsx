@@ -15,6 +15,7 @@ export default function OTPModal({
   const [error, setError] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const inputRef = useRef(null);
+  const [showOtp] = useState(false);
 
   useEffect(() => {
     if (isOpen && inputRef.current && timer > 0) {
@@ -47,6 +48,15 @@ export default function OTPModal({
     setError("");
     onVerify(otp);
   };
+
+  useEffect(() => {
+    if (
+      (otpMessage && otpMessage.includes("sai")) ||
+      otpMessage.includes("không hợp lệ")
+    ) {
+      setError(otpMessage);
+    }
+  }, [otpMessage]);
 
   const handleCancel = () => setShowConfirmModal(true);
 
@@ -86,8 +96,11 @@ export default function OTPModal({
 
         <div className="otp-modal-body">
           <p className="otp-description">
-            {otpMessage ||
-              "Mã xác thực YS-OTP đã được gửi đến thiết bị của bạn"}
+            {otpMessage &&
+            !otpMessage.includes("sai") &&
+            !otpMessage.includes("không hợp lệ")
+              ? otpMessage
+              : "Mã xác thực YS-OTP đã được gửi đến thiết bị của bạn"}
           </p>
 
           <div className="otp-input-group">
@@ -97,13 +110,21 @@ export default function OTPModal({
             <input
               ref={inputRef}
               id="otp-input"
-              type="text"
+              type="password"
               className="otp-input"
               placeholder=""
               value={otp}
               onChange={(e) => {
-                setOtp(e.target.value);
+                const newOtp = e.target.value;
+                setOtp(newOtp);
                 setError("");
+
+                // Tự động submit khi nhập đủ 6 ký tự
+                if (newOtp.length === 6 && timer > 0) {
+                  setTimeout(() => {
+                    onVerify(newOtp);
+                  }, 100);
+                }
               }}
               onKeyPress={handleKeyPress}
               maxLength={6}

@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $primary-orange: #b8622f;
 $primary-orange-hover: #9d5328;
 $dark-bg: rgba(0, 0, 0, 0.85);
@@ -61,7 +63,6 @@ $error-color: #e74c3c;
 .otp-modal-header {
   padding: 32px 32px 24px;
   text-align: center;
-  border-bottom: 1px solid $border-color;
 
   .otp-icon {
     width: 60px;
@@ -86,7 +87,7 @@ $error-color: #e74c3c;
 }
 
 .otp-modal-body {
-  padding: 32px;
+  padding: 3px;
 
   .otp-description {
     color: $text-gray;
@@ -94,6 +95,7 @@ $error-color: #e74c3c;
     line-height: 1.6;
     margin: 0 0 20px;
     text-align: center;
+    white-space: nowrap;
   }
 
   .otp-countdown {
@@ -119,17 +121,19 @@ $error-color: #e74c3c;
     margin-bottom: 16px;
     display: flex;
     gap: 8px;
+    justify-content: center;
+    align-items: center;
 
     .otp-label {
       display: block;
       color: $text-light;
       font-size: 16px;
       font-weight: 500;
-      margin-bottom: 8px;
+      margin-bottom: 0;
     }
 
     .otp-input {
-      width: 100%;
+      width: 70%;
       padding: 12px 16px;
       background: $input-bg;
       border: 1px solid $border-color;
@@ -161,7 +165,7 @@ $error-color: #e74c3c;
 }
 
 .otp-modal-footer {
-  padding: 0 32px 32px;
+  padding: 0 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -195,7 +199,7 @@ $error-color: #e74c3c;
         background: linear-gradient(
           135deg,
           $primary-orange-hover,
-          darken($primary-orange-hover, 5%)
+          color.adjust($primary-orange-hover, $lightness: -5%)
         );
         box-shadow: 0 6px 16px rgba(184, 98, 47, 0.4);
       }
@@ -213,7 +217,7 @@ $error-color: #e74c3c;
       &:hover {
         background: rgba(255, 255, 255, 0.05);
         color: $text-light;
-        border-color: lighten($border-color, 10%);
+        border-color: color.adjust($border-color, $lightness: 10%);
       }
     }
 
@@ -320,7 +324,7 @@ $error-color: #e74c3c;
         background: linear-gradient(
           135deg,
           $primary-orange-hover,
-          darken($primary-orange-hover, 5%)
+          color.adjust($primary-orange-hover, $lightness: -5%)
         );
         box-shadow: 0 6px 16px rgba(184, 98, 47, 0.4);
       }
@@ -334,7 +338,7 @@ $error-color: #e74c3c;
       &:hover {
         background: rgba(255, 255, 255, 0.05);
         color: $text-light;
-        border-color: lighten($border-color, 10%);
+        border-color: color.adjust($border-color, $lightness: 10%);
       }
     }
   }

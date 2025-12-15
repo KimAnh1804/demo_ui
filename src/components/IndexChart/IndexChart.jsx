@@ -169,53 +169,47 @@ export default function IndexChart({
     [lineData, volumeData, reference, timeSlots, symbolCode, referenceLineData]
   );
 
-  // Imperative update khi symbolCode thay đổi (chỉ update khi card được chọn)
+  // Update chart khi data thay đổi
   useEffect(() => {
-    if (!isSelected) return;
-
     if (!chartRef.current?.chart) return;
 
     const chart = chartRef.current.chart;
 
     // Update series data
-    chart.series[0].setData(volumeData, false);
-    chart.series[1].setData(lineData, false);
-    chart.series[2].setData(referenceLineData, false);
+    if (chart.series[0]) chart.series[0].setData(volumeData, false);
+    if (chart.series[1]) chart.series[1].setData(lineData, false);
+    if (chart.series[2]) chart.series[2].setData(referenceLineData, false);
 
     // Update xAxis categories
-    chart.xAxis[0].setCategories(timeSlots, false);
+    if (chart.xAxis[0]) chart.xAxis[0].setCategories(timeSlots, false);
 
     // Update yAxis plotLines (reference line)
-    chart.yAxis[0].update({
-      plotLines: [
+    if (chart.yAxis[0]) {
+      chart.yAxis[0].update(
         {
-          value: reference,
-          zIndex: 10,
-          width: 0,
-          color: "#CE9B51",
-          label: {
-            text: reference != null ? reference.toFixed(2) : "",
-            align: "center",
-            style: {
-              color: "var(--TEXT__1)",
-              fontSize: "0.65rem",
+          plotLines: [
+            {
+              value: reference,
+              zIndex: 10,
+              width: 0,
+              color: "#CE9B51",
+              label: {
+                text: reference != null ? reference.toFixed(2) : "",
+                align: "center",
+                style: {
+                  color: "var(--TEXT__1)",
+                  fontSize: "0.65rem",
+                },
+              },
             },
-          },
+          ],
         },
-      ],
-    });
+        false
+      );
+    }
 
-    // Redraw chart
     chart.redraw();
-  }, [
-    symbolCode,
-    lineData,
-    volumeData,
-    reference,
-    timeSlots,
-    isSelected,
-    referenceLineData,
-  ]);
+  }, [lineData, volumeData, reference, timeSlots, referenceLineData]);
 
   return (
     <HighchartsReact

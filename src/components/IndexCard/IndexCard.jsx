@@ -172,7 +172,7 @@ export default function IndexCard({
         lineData={line}
         volumeData={volume}
         reference={reference}
-        symbolCode={symbolCode}
+        symbolCode={currentSymbol}
         timeLabels={timeLabels}
         onHoverData={handleHoverData}
         isSelected={isSelected}
