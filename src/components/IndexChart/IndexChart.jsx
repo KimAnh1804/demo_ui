@@ -1,8 +1,8 @@
 import "./IndexChart.scss";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { formatVolume } from "../../utils/format";
-import { useRef, useMemo, useEffect } from "react";
+import {formatVolume} from "../../utils/format";
+import {useRef, useMemo, useEffect} from "react";
 
 const CHART_CONFIG = {
   height: 140,
@@ -48,17 +48,17 @@ export default function IndexChart({
         margin: CHART_CONFIG.margin,
         backgroundColor: CHART_CONFIG.backgroundColor,
       },
-      title: { text: null },
-      credits: { enabled: false },
-      legend: { enabled: false },
+      title: {text: null},
+      credits: {enabled: false},
+      legend: {enabled: false},
       plotOptions: {
         series: {
-          marker: { enabled: false, radius: 8 },
+          marker: {enabled: false, radius: 8},
           animation: false,
         },
         column: {
           animation: false,
-          dataLabels: { style: { textShadow: false } },
+          dataLabels: {style: {textShadow: false}},
           pointWidth: 1,
           maxPointWidth: 1,
           minPointWidth: 1,
@@ -66,14 +66,14 @@ export default function IndexChart({
         },
         line: {
           lineWidth: 2,
-          dataLabels: { style: { textShadow: false } },
+          dataLabels: {style: {textShadow: false}},
         },
       },
       xAxis: {
         categories: timeSlots,
         labels: {
           enabled: true,
-          style: { color: "#aaa", fontSize: 12 },
+          style: {color: "#aaa", fontSize: 12},
           y: 16,
         },
         tickLength: 0,
@@ -84,8 +84,8 @@ export default function IndexChart({
         {
           visible: true,
           opposite: true,
-          labels: { enabled: false },
-          title: { text: null },
+          labels: {enabled: false},
+          title: {text: null},
           plotLines: [
             {
               value: reference,
@@ -105,8 +105,8 @@ export default function IndexChart({
         },
         {
           visible: true,
-          labels: { enabled: false },
-          title: { text: null },
+          labels: {enabled: false},
+          title: {text: null},
         },
       ],
       tooltip: {
@@ -126,16 +126,14 @@ export default function IndexChart({
           <div class='flex flex-1 flex-direction-column fs-verySmall' style="background-color: black; color: white; padding: 8px;">
             <div class='flex-1'>${timeDisplay}</div>
             <div class='flex-1'>
-              ${
-                symbolCode || ""
-              }: <span style="color: ${valueColor}; font-weight: bold;">${
-            indexValue?.toFixed ? indexValue.toFixed(2) : indexValue
-          }</span>
+              ${symbolCode || ""
+            }: <span style="color: ${valueColor}; font-weight: bold;">${indexValue?.toFixed ? indexValue.toFixed(2) : indexValue
+            }</span>
             </div>
             <div class='flex-1'>
               KLGD: <span style="color: ${volumeColor}; font-weight: bold;">${formatVolume(
-            indexVolume
-          )}</span>
+              indexVolume
+            )}</span>
             </div>
           </div>
         `.replace(/<!-- -->/g, "");
@@ -153,7 +151,7 @@ export default function IndexChart({
           data: lineData,
           color: "#00ff66",
           lineWidth: 2,
-          marker: { enabled: false },
+          marker: {enabled: false},
         },
         {
           type: "line",
@@ -161,7 +159,7 @@ export default function IndexChart({
           color: "#ffb600",
           dashStyle: "Dash",
           lineWidth: 2,
-          marker: { enabled: false },
+          marker: {enabled: false},
           enableMouseTracking: false,
         },
       ],

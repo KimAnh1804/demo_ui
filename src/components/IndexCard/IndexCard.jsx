@@ -1,6 +1,6 @@
 import "./IndexCard.scss";
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { formatVolume, formatValueBillion } from "../../utils/format";
+import React, {useState, useEffect, useRef, useCallback, useMemo} from "react";
+import {formatVolume, formatValueBillion} from "../../utils/format";
 import IndexChart from "../IndexChart";
 import {
   ArrowUpOutlined,
@@ -11,25 +11,21 @@ import {
   subscribeStream,
   unsubscribeStream,
 } from "../../services/socketStream";
+import {TOPIC_CONFIGS} from "../../configs/marketConfig";
 
 const AVAILABLE_INDICES = [
-  { code: "VNI", label: "VNI" },
-  { code: "VN30", label: "VN30" },
-  { code: "HNX", label: "HNX" },
-  { code: "UPCOM", label: "UPCOM" },
-  { code: "HNX30", label: "HNX30" },
+  {code: "VNI", label: "VNI"},
+  {code: "VN30", label: "VN30"},
+  {code: "HNX", label: "HNX"},
+  {code: "UPCOM", label: "UPCOM"},
+  {code: "HNX30", label: "HNX30"},
 ];
 
-const SYMBOL_TO_TOPIC = {
-  VNI: "KRXMDDS|IGI|STO|001",
-  VN30: "KRXMDDS|IGI|STO|101",
-  HNX: "KRXMDDS|IGI|STX|002",
-  UPCOM: "KRXMDDS|IGI|UPX|301",
-  HNX30: "KRXMDDS|IGI|STX|100",
-};
+const SYMBOL_TO_TOPIC = TOPIC_CONFIGS.reduce((acc, config) => {
+  acc[config.symbol] = config.topic;
+  return acc;
+}, {});
 
-// Card hiển thị thông tin realtime của từng chỉ số
-// Khi đổi chỉ số sẽ unsub topic cũ và sub topic mới, cập nhật dữ liệu realtime
 export default function IndexCard({
   title,
   symbolCode,
@@ -51,55 +47,66 @@ export default function IndexCard({
 }) {
   const [currentSymbol, setCurrentSymbol] = useState(symbolCode);
   const topicRef = useRef(SYMBOL_TO_TOPIC[symbolCode]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [hoveredData, setHoveredData] = useState(null);
+  const dropdownRef = useRef(null);
 
-  // Handler cập nhật dữ liệu realtime cho card
-  const [displayUp, setDisplayUp] = useState(up);
-  const [displayMid, setDisplayMid] = useState(mid);
-  const [displayDown, setDisplayDown] = useState(down);
+  const [displayData, setDisplayData] = useState({
+    title,
+    price,
+    change,
+    percent,
+    volumeText,
+    valueText,
+    up,
+    mid,
+    down,
+  });
 
-  // Handler nhận data realtime từ socket, cập nhật các state hiển thị
   const socketHandler = useCallback(
     (data) => {
-      if (data && data.data) {
-        if (data.data.t30217 !== undefined) {
-          setDisplayPrice(data.data.t30217);
-          setDisplayChange(data.data.t40003);
-          const reference = data.data.t40002;
-          setDisplayPercent(
-            reference
-              ? (((data.data.t40003 || 0) / reference) * 100).toFixed(2)
-              : null
-          );
-          // KL: lấy từ t387, GT: lấy từ t381
-          const vol = data.data.t387 || data.data.t40004 || 0;
-          const val = data.data.t381 || data.data.t40006 || 0;
-          setDisplayVolumeText(formatVolume(vol));
-          setDisplayValueText(formatValueBillion(val));
+      if (data?.data) {
+        const d = data.data;
+        const updates = {};
 
-          setDisplayUp(
-            data.data.t30590 !== undefined
-              ? data.data.t30589 !== undefined
-                ? `${data.data.t30590}(${data.data.t30589})`
-                : `${data.data.t30590}`
-              : up
-          );
-          setDisplayMid(
-            data.data.t30591 !== undefined ? `${data.data.t30591}` : mid
-          );
-          setDisplayDown(
-            data.data.t30592 !== undefined
-              ? data.data.t30593 !== undefined
-                ? `${data.data.t30592}(${data.data.t30593})`
-                : `${data.data.t30592}`
-              : down
-          );
+        if (d.t30217 !== undefined) {
+          updates.price = d.t30217;
+          updates.change = d.t40003;
+          const reference = d.t40002;
+          updates.percent = reference
+            ? (((d.t40003 || 0) / reference) * 100).toFixed(2)
+            : null;
+
+          const vol = d.t387 || d.t40004 || 0;
+          const val = d.t381 || d.t40006 || 0;
+          updates.volumeText = formatVolume(vol);
+          updates.valueText = formatValueBillion(val);
+        }
+
+        if (d.t30590 !== undefined) {
+          updates.up =
+            d.t30589 !== undefined
+              ? `${d.t30590}(${d.t30589})`
+              : `${d.t30590}`;
+        }
+        if (d.t30591 !== undefined) {
+          updates.mid = `${d.t30591}`;
+        }
+        if (d.t30592 !== undefined) {
+          updates.down =
+            d.t30593 !== undefined
+              ? `${d.t30592}(${d.t30593})`
+              : `${d.t30592}`;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          setDisplayData((prev) => ({...prev, ...updates}));
         }
       }
     },
-    [up, mid, down]
+    []
   );
 
-  // Khi currentSymbol đổi sẽ tự động unsub topic cũ và sub topic mới
   useEffect(() => {
     const topic = SYMBOL_TO_TOPIC[currentSymbol];
     if (!topic) return;
@@ -108,49 +115,35 @@ export default function IndexCard({
     return () => {
       unsubscribeStream(topic);
     };
-  }, [currentSymbol]);
+  }, [currentSymbol, socketHandler]);
 
-  const [hoveredData, setHoveredData] = useState(null);
-  const [displayPrice, setDisplayPrice] = useState(price);
-  const [displayChange, setDisplayChange] = useState(change);
-  const [displayPercent, setDisplayPercent] = useState(percent);
-  const [displayVolumeText, setDisplayVolumeText] = useState(volumeText);
-  const [displayValueText, setDisplayValueText] = useState(valueText);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [displayTitle, setDisplayTitle] = useState(title);
-  const dropdownRef = useRef(null);
-  const previousSymbolRef = useRef(symbolCode);
-
-  // Luôn đồng bộ state hiển thị với props từ App (khi có realtime update)
   useEffect(() => {
-    setDisplayPrice(price);
-    setDisplayChange(change);
-    setDisplayPercent(percent);
-    setDisplayVolumeText(volumeText);
-    setDisplayValueText(valueText);
-    setDisplayTitle(title);
-    setDisplayUp(up);
-    setDisplayMid(mid);
-    setDisplayDown(down);
+    setDisplayData({
+      title,
+      price,
+      change,
+      percent,
+      volumeText,
+      valueText,
+      up,
+      mid,
+      down,
+    });
   }, [price, change, percent, volumeText, valueText, title, up, mid, down]);
 
-  // Xử lý khi chọn chỉ số từ dropdown
-  // Khi chọn chỉ số mới từ dropdown sẽ đổi currentSymbol
   const handleSelectIndex = (newSymbolCode, newTitle) => {
     setCurrentSymbol(newSymbolCode);
-    setDisplayTitle(newTitle);
+    setDisplayData((prev) => ({...prev, title: newTitle}));
     setShowDropdown(false);
     if (onSymbolChange) {
       onSymbolChange(newSymbolCode);
     }
   };
 
-  // Xử lý hover data từ chart
   const handleHoverData = useCallback((hoverInfo) => {
     setHoveredData(hoverInfo);
   }, []);
 
-  // Đóng dropdown khi click bên ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -164,7 +157,7 @@ export default function IndexCard({
     };
   }, []);
 
-  const isPositive = displayChange >= 0;
+  const isPositive = displayData.change >= 0;
 
   return (
     <div className="index-card-root">
@@ -178,7 +171,6 @@ export default function IndexCard({
         isSelected={isSelected}
       />
 
-      {/* Hiển thị dữ liệu khi hover */}
       {hoveredData && (
         <div className="index-card-hover-info">
           <div className="index-card-hover-time">
@@ -195,10 +187,9 @@ export default function IndexCard({
           className="index-card-title-select"
           onClick={() => setShowDropdown(!showDropdown)}
         >
-          <span>{displayTitle}</span>
+          <span>{displayData.title}</span>
           <CaretDownOutlined className={showDropdown ? "dropdown-open" : ""} />
         </div>
-        {/* Dropdown menu */}
         {showDropdown && (
           <div className="index-card-dropdown">
             {AVAILABLE_INDICES.map((index) => (
@@ -227,7 +218,7 @@ export default function IndexCard({
 
       <div className="index-card-price-row">
         <span className={isPositive ? "price-up" : "price-down"}>
-          {displayPrice}
+          {displayData.price}
         </span>
         <span
           className={
@@ -235,34 +226,34 @@ export default function IndexCard({
           }
         >
           {isPositive ? (
-            <ArrowUpOutlined style={{ marginRight: 4 }} />
+            <ArrowUpOutlined style={{marginRight: 4}} />
           ) : (
-            <ArrowDownOutlined style={{ marginRight: 4 }} />
+            <ArrowDownOutlined style={{marginRight: 4}} />
           )}
-          {displayChange} ({displayPercent}%)
+          {displayData.change} ({displayData.percent}%)
         </span>
       </div>
 
       <div className="index-card-volume-value-row">
         <div>
           <div className="index-card-label">KL</div>
-          <div className="index-card-value">{displayVolumeText}</div>
+          <div className="index-card-value">{displayData.volumeText}</div>
         </div>
         <div>
           <div className="index-card-label">GT</div>
-          <div className="index-card-value">{displayValueText}</div>
+          <div className="index-card-value">{displayData.valueText}</div>
         </div>
       </div>
 
       <div className="index-card-up-mid-down-row">
         <div className="index-card-up">
-          <ArrowUpOutlined style={{ marginRight: 4 }} />
-          <span>{displayUp}</span>
+          <ArrowUpOutlined style={{marginRight: 4}} />
+          <span>{displayData.up}</span>
         </div>
-        <div className="index-card-mid">{displayMid}</div>
+        <div className="index-card-mid">{displayData.mid}</div>
         <div className="index-card-down">
-          <ArrowDownOutlined style={{ marginRight: 4 }} />
-          <span>{displayDown}</span>
+          <ArrowDownOutlined style={{marginRight: 4}} />
+          <span>{displayData.down}</span>
         </div>
         <div className="index-card-session">{sessionText || ""}</div>
       </div>

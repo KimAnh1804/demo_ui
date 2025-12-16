@@ -1,16 +1,20 @@
-import React, {useState, useEffect} from "react";
-import {MdAddBox} from "react-icons/md";
-import {FaCaretDown, FaPlusCircle} from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { MdAddBox } from "react-icons/md";
+import { FaCaretDown, FaPlusCircle } from "react-icons/fa";
 import WatchlistModal from "../WatchlistModal/WatchlistModal";
 import "./TopMenu.scss";
-import {PiNotePencilLight} from "react-icons/pi";
-import {AiOutlineDelete} from "react-icons/ai";
+import { MOCK_DATA } from "../../data/mockStockData";
+import { PiNotePencilLight } from "react-icons/pi";
+import { AiOutlineDelete } from "react-icons/ai";
+import { IoAlertCircle } from "react-icons/io5";
 import {
   sendCreateWatchlist,
   sendUpdateWatchlist,
   sendDeleteWatchlist,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
+  sendRealtimeWatchlist,
+  sendFinanceInfoRequest,
 } from "../../services/socketTrading";
 
 const MENU_ITEMS = [
@@ -24,140 +28,396 @@ const MENU_ITEMS = [
     active: true,
     hasDropdown: true,
     items: [
-      {text: "HOSE"},
-      {text: "VN30", active: true},
-      {text: "Giao dịch thỏa thuận"},
-      {text: "Lô lẻ HOSE"},
+      { text: "HOSE" },
+      { text: "VN30", active: true },
+      { text: "Giao dịch thỏa thuận" },
+      { text: "Lô lẻ HOSE" },
     ],
   },
   {
     title: "HNX",
     hasDropdown: true,
     items: [
-      {text: "HNX"},
-      {text: "HNX30"},
-      {text: "Giao dịch thỏa thuận"},
-      {text: "Lô lẻ HNX"},
+      { text: "HNX" },
+      { text: "HNX30" },
+      { text: "Giao dịch thỏa thuận" },
+      { text: "Lô lẻ HNX" },
     ],
   },
   {
     title: "UPCOM",
     hasDropdown: true,
     items: [
-      {text: "UPCOM"},
-      {text: "Giao dịch thỏa thuận"},
-      {text: "Lô lẻ UPCOM"},
+      { text: "UPCOM" },
+      { text: "Giao dịch thỏa thuận" },
+      { text: "Lô lẻ UPCOM" },
     ],
   },
   {
     title: "Nhóm ngành",
     hasDropdown: true,
     items: [
-      {text: "Sản xuất Nông-Lâm-Ngư nghiệp"},
-      {text: "Khai khoáng"},
-      {text: "Tiện ích cộng đồng"},
-      {text: "Xây dựng và bất động sản"},
-      {text: "Sản xuất"},
-      {text: "Vận tải và kho bãi"},
-      {text: "Công nghệ-Truyền thông"},
-      {text: "Tài chính và bảo hiểm"},
-      {text: "Thuê và cho thuê"},
-      {text: "Dịch vụ chuyên môn-Khoa học-Kỹ thuật"},
-      {text: "Dịch vụ hỗ trợ-Dịch vụ xử lý và tái chế rác thải"},
-      {text: "Giáo dục và đào tạo"},
-      {text: "Dịch vụ chăm sóc sức khỏe"},
-      {text: "Nghệ thuật và dịch vụ giải trí"},
-      {text: "Dịch vụ lưu trú và ăn uống"},
-      {text: "Hành chính công"},
-      {text: "Dịch vụ khác"},
-      {text: "Bán buôn"},
-      {text: "Bán lẻ"},
+      { text: "Sản xuất Nông-Lâm-Ngư nghiệp" },
+      { text: "Khai khoáng" },
+      { text: "Tiện ích cộng đồng" },
+      { text: "Xây dựng và bất động sản" },
+      { text: "Sản xuất" },
+      { text: "Vận tải và kho bãi" },
+      { text: "Công nghệ-Truyền thông" },
+      { text: "Tài chính và bảo hiểm" },
+      { text: "Thuê và cho thuê" },
+      { text: "Dịch vụ chuyên môn-Khoa học-Kỹ thuật" },
+      { text: "Dịch vụ hỗ trợ-Dịch vụ xử lý và tái chế rác thải" },
+      { text: "Giáo dục và đào tạo" },
+      { text: "Dịch vụ chăm sóc sức khỏe" },
+      { text: "Nghệ thuật và dịch vụ giải trí" },
+      { text: "Dịch vụ lưu trú và ăn uống" },
+      { text: "Hành chính công" },
+      { text: "Dịch vụ khác" },
+      { text: "Bán buôn" },
+      { text: "Bán lẻ" },
     ],
   },
 ];
 
-const TopMenu = ({onLogout}) => {
-  const [modalMode, setModalMode] = useState("create");
-  const [showModal, setShowModal] = useState(false);
+const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [watchlists, setWatchlists] = useState(() => {
     // Load từ localStorage khi khởi tạo
-    const saved = localStorage.getItem('watchlists');
+    const saved = localStorage.getItem("watchlists");
     return saved ? JSON.parse(saved) : [];
   });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedWatchlist, setSelectedWatchlist] = useState(null);
+  const [currentSelectedWatchlistId, setCurrentSelectedWatchlistId] =
+    useState(null);
+  const [currentSelectedWatchlistName, setCurrentSelectedWatchlistName] =
+    useState("");
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestionsVisible, setSuggestionsVisible] = useState(false);
+  const [selectedGroupTitle, setSelectedGroupTitle] = useState("");
+  const lastGroupTableRef = React.useRef([]);
+  const groupServiceUnsubRef = React.useRef(null);
+
+  const handleFinanceGroupClick = (groupName) => {
+    if (typeof sendFinanceInfoRequest !== "function") return;
+
+    const clientSeq = sendFinanceInfoRequest();
+
+    const seqHandler = (resp) => {
+      console.log("TopMenu.handleFinanceGroupClick.SEQ_RESP", resp);
+      try {
+        let symbols = [];
+        if (Array.isArray(resp?.Data) && resp.Data.length > 0) {
+          symbols = resp.Data.map(
+            (it) => it.SecCode || it.code || it.symbol || it[0]
+          );
+        } else if (Array.isArray(resp?.InVal) && resp.InVal.length > 0) {
+          symbols = resp.InVal;
+        } else if (Array.isArray(resp?.OutVal) && resp.OutVal.length > 0) {
+          symbols = resp.OutVal;
+        } else if (Array.isArray(resp)) {
+          symbols = resp.map(
+            (it) => it?.SecCode || it?.code || it?.symbol || it[0]
+          );
+        }
+
+        symbols = (symbols || [])
+          .map((s) => (typeof s === "string" ? s.trim() : s))
+          .filter(Boolean);
+
+        const tableData = symbols.map((sym) => ({
+          symbol: sym,
+          ref: 0,
+          ceiling: 0,
+          floor: 0,
+          bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+          ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+          match: { price: 0, vol: 0, change: 0, percent: 0 },
+          totalVol: 0,
+          prices: { avg: 0, high: 0, low: 0, open: 0 },
+          foreign: { buy: 0, sell: 0 },
+        }));
+
+        lastGroupTableRef.current = tableData;
+        setCurrentSelectedWatchlistId(groupName);
+        setCurrentSelectedWatchlistName(groupName);
+        setSelectedGroupTitle(groupName);
+
+        if (typeof onWatchlistSelect === "function")
+          onWatchlistSelect(tableData, groupName);
+      } catch (e) {
+        console.error("Error handling finance info SEQ response", e, resp);
+      } finally {
+        unsubscribeTradingResponse(`SEQ_${clientSeq}`, seqHandler);
+      }
+    };
+
+    subscribeTradingResponse(`SEQ_${clientSeq}`, seqHandler);
+
+    if (typeof groupServiceUnsubRef.current === "function") {
+      try {
+        groupServiceUnsubRef.current();
+      } catch (e) {
+        console.warn("Error unsubscribing previous group service", e);
+      }
+      groupServiceUnsubRef.current = null;
+    }
+
+    const serviceName = "FOSqMkt02Vs_FinanceInfo";
+    const realtimeHandler = (data) => {
+      console.log("TopMenu.handleFinanceGroupClick.REALTIME", data);
+      try {
+        const payloads = Array.isArray(data?.Data) ? data.Data : [data];
+        let updated = [...(lastGroupTableRef.current || [])];
+
+        payloads.forEach((p) => {
+          const sym =
+            p.SecCode || p.code || p.symbol || p?.InVal?.[0] || p?.OutVal?.[0];
+          if (!sym) return;
+          const idx = updated.findIndex((r) => r.symbol === sym);
+          const newValues = {};
+          if (p.t30217 !== undefined)
+            newValues.match = {
+              ...(updated[idx]?.match || {}),
+              price: parseFloat(p.t30217),
+            };
+          if (p.t40003 !== undefined)
+            newValues.match = {
+              ...(newValues.match || updated[idx]?.match || {}),
+              change: parseFloat(p.t40003),
+            };
+          if (p.t387 !== undefined) newValues.totalVol = parseFloat(p.t387);
+          if (idx > -1) {
+            updated[idx] = { ...updated[idx], ...newValues };
+          } else {
+            updated.push({ symbol: sym, ...newValues });
+          }
+        });
+
+        lastGroupTableRef.current = updated;
+        if (typeof onWatchlistSelect === "function")
+          onWatchlistSelect(updated, groupName);
+      } catch (e) {
+        console.error("Error handling finance realtime", e, data);
+      }
+    };
+
+    groupServiceUnsubRef.current = subscribeTradingResponse(
+      serviceName,
+      realtimeHandler
+    );
+  };
 
   // Lưu vào localStorage mỗi khi watchlists thay đổi
   useEffect(() => {
-    localStorage.setItem('watchlists', JSON.stringify(watchlists));
+    localStorage.setItem("watchlists", JSON.stringify(watchlists));
   }, [watchlists]);
 
-  const handleOpenCreateModal = () => {
-    setModalMode("create");
-    setSelectedWatchlist(null);
-    setShowModal(true);
+  const handleCreateWatchlist = (watchlistData) => {
+    const clientSeq = sendCreateWatchlist(
+      watchlistData.name,
+      watchlistData.type
+    );
+
+    // Lắng nghe RES_MSG
+    subscribeTradingResponse(`SEQ_${clientSeq}`, (response) => {
+      if (response.Result === "1") {
+        // Thành công, thêm vào danh sách
+        const newWatchlist = {
+          id: Date.now(),
+          name: watchlistData.name,
+          type: watchlistData.type,
+        };
+        setWatchlists([...watchlists, newWatchlist]);
+        setShowCreateModal(false);
+      } else {
+        alert(`Lỗi: ${response.Message || "Không thể tạo danh mục"}`);
+      }
+
+      unsubscribeTradingResponse(`SEQ_${clientSeq}`);
+    });
   };
 
-  const handleOpenEditModal = (watchlist) => {
-    setModalMode("edit");
+  const handleEditWatchlist = (watchlist) => {
     setSelectedWatchlist(watchlist);
-    setShowModal(true);
+    setShowEditModal(true);
   };
 
-  const handleOpenDeleteModal = (watchlist) => {
-    setModalMode("delete");
+  const handleUpdateWatchlist = (updatedData) => {
+    const clientSeq = sendUpdateWatchlist(
+      selectedWatchlist.id,
+      updatedData.name,
+      updatedData.type
+    );
+
+    // Lắng nghe RES_MSG
+    const unsubscribe = subscribeTradingResponse(
+      `SEQ_${clientSeq}`,
+      (response) => {
+        response.Result === "1" || response.Result === 1;
+        // Thành công, cập nhật danh sách
+        setWatchlists(
+          watchlists.map((w) =>
+            w.id === selectedWatchlist.id
+              ? { ...w, name: updatedData.name, type: updatedData.type }
+              : w
+          )
+        );
+        setShowEditModal(false);
+        setSelectedWatchlist(null);
+
+        unsubscribe();
+      }
+    );
+  };
+
+  const handleDeleteWatchlist = (watchlist) => {
     setSelectedWatchlist(watchlist);
-    setShowModal(true);
+    setShowDeleteModal(true);
   };
 
-  const handleConfirmAction = (data) => {
-    if (modalMode === "create") {
-      const clientSeq = sendCreateWatchlist(data.name, data.type);
-      subscribeTradingResponse(`SEQ_${clientSeq}`, (response) => {
-        if (response.Result === "1") {
-          const newWatchlist = {
-            id: Date.now(),
-            name: data.name,
-            type: data.type,
-          };
-          setWatchlists([...watchlists, newWatchlist]);
-          setShowModal(false);
-        } else {
-          console.error(`Lỗi: ${response.Message || "Không thể tạo danh mục"}`);
+  const selectWatchlist = (watchlist) => {
+    let symbols = Array.isArray(watchlist.symbols) ? watchlist.symbols : [];
+
+    if ((!symbols || symbols.length === 0) && watchlist.id !== undefined) {
+      try {
+        const saved = localStorage.getItem(`watchlist_items_${watchlist.id}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) symbols = parsed;
         }
-        unsubscribeTradingResponse(`SEQ_${clientSeq}`);
-      });
-    } else if (modalMode === "edit") {
-      const clientSeq = sendUpdateWatchlist(selectedWatchlist.id, data.name, data.type);
-      subscribeTradingResponse(`SEQ_${clientSeq}`, (response) => {
-        if (response.Result === "1") {
-          setWatchlists(watchlists.map((w) =>
-            w.id === selectedWatchlist.id ? {...w, name: data.name, type: data.type} : w
-          ));
-          setShowModal(false);
-        } else {
-          console.error(`Lỗi: ${response.Message || "Không thể cập nhật danh mục"}`);
-        }
-        unsubscribeTradingResponse(`SEQ_${clientSeq}`);
-      });
-    } else if (modalMode === "delete") {
-      const clientSeq = sendDeleteWatchlist(selectedWatchlist.id);
-      subscribeTradingResponse(`SEQ_${clientSeq}`, (response) => {
-        if (response.Result === "1") {
-          setWatchlists(watchlists.filter((w) => w.id !== selectedWatchlist.id));
-          setShowModal(false);
-        } else {
-          console.error(`Lỗi: ${response.Message || "Không thể xóa danh mục"}`);
-        }
-        unsubscribeTradingResponse(`SEQ_${clientSeq}`);
-      });
+      } catch (e) {
+        console.error("Failed to parse watchlist items from localStorage", e);
+      }
     }
+
+    const tableData = symbols.map((sym) => ({
+      symbol: sym,
+      ref: 0,
+      ceiling: 0,
+      floor: 0,
+      bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+      ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+      match: { price: 0, vol: 0, change: 0, percent: 0 },
+      totalVol: 0,
+      prices: { avg: 0, high: 0, low: 0, open: 0 },
+      foreign: { buy: 0, sell: 0 },
+    }));
+
+    if (typeof onWatchlistSelect === "function") {
+      console.log("TopMenu.selectWatchlist", {
+        id: watchlist.id,
+        name: watchlist.name,
+        tableSize: tableData.length,
+      });
+      setCurrentSelectedWatchlistId(watchlist.id);
+      setCurrentSelectedWatchlistName(watchlist.name || "");
+      onWatchlistSelect(tableData, watchlist.name || "");
+    }
+  };
+
+  const confirmDelete = () => {
+    const clientSeq = sendDeleteWatchlist(selectedWatchlist.id);
+
+    // Lắng nghe RES_MSG
+    const unsubscribe = subscribeTradingResponse(
+      `SEQ_${clientSeq}`,
+      (response) => {
+        if (response.Result === "1" || response.Result === 1)
+          // Thành công, xóa khỏi danh sách
+          setWatchlists(
+            watchlists.filter((w) => w.id !== selectedWatchlist.id)
+          );
+        setShowDeleteModal(false);
+        setSelectedWatchlist(null);
+
+        unsubscribe();
+      }
+    );
+  };
+
+  const handleOwnedWatchlistClick = () => {
+    if (typeof sendRealtimeWatchlist !== "function") return;
+
+    const clientSeq = sendRealtimeWatchlist();
+    setCurrentSelectedWatchlistId("owned");
+    setCurrentSelectedWatchlistName("DM sở hữu");
+
+    const handler = (response) => {
+      try {
+        let symbols = [];
+
+        if (Array.isArray(response?.Data) && response.Data.length > 0) {
+          symbols = response.Data.map(
+            (it) => it.SecCode || it.code || it.symbol || it[0]
+          );
+        } else if (
+          Array.isArray(response?.InVal) &&
+          response.InVal.length > 0
+        ) {
+          symbols = response.InVal;
+        } else if (
+          Array.isArray(response?.OutVal) &&
+          response.OutVal.length > 0
+        ) {
+          symbols = response.OutVal;
+        } else if (Array.isArray(response)) {
+          // Some services reply with array of items
+          symbols = response.map(
+            (it) => it?.SecCode || it?.code || it?.symbol || it[0]
+          );
+        }
+
+        symbols = (symbols || [])
+          .map((s) => (typeof s === "string" ? s.trim() : s))
+          .filter(Boolean);
+
+        const tableData = symbols.map((sym) => ({
+          symbol: sym,
+          ref: 0,
+          ceiling: 0,
+          floor: 0,
+          bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+          ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
+          match: { price: 0, vol: 0, change: 0, percent: 0 },
+          totalVol: 0,
+          prices: { avg: 0, high: 0, low: 0, open: 0 },
+          foreign: { buy: 0, sell: 0 },
+        }));
+
+        if (typeof onWatchlistSelect === "function") {
+          onWatchlistSelect(tableData, "DM sở hữu");
+        } else {
+          console.warn("onWatchlistSelect not provided");
+        }
+      } catch (e) {
+        console.error("Error parsing realtime watchlist response", e, response);
+      } finally {
+        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+      }
+    };
+
+    subscribeTradingResponse(`SEQ_${clientSeq}`, handler);
   };
 
   return (
     <div className="top-menu-container">
       <div className="top-menu-left">
         <div className="search-box">
-          <input type="text" placeholder="Nhập mã CK" />
+          <input
+            type="text"
+            placeholder="Nhập mã CK"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value.toUpperCase());
+              setSuggestionsVisible(true);
+            }}
+            onFocus={() => setSuggestionsVisible(true)}
+            onBlur={() => setTimeout(() => setSuggestionsVisible(false), 150)}
+          />
           <MdAddBox
             className="search-icon"
             style={{
@@ -170,6 +430,34 @@ const TopMenu = ({onLogout}) => {
               height: "40px",
             }}
           />
+
+          {suggestionsVisible && searchQuery && (
+            <div className="search-suggestions">
+              {(MOCK_DATA || [])
+                .map((m) => m.symbol)
+                .filter((s) => s && s.includes(searchQuery))
+                .slice(0, 10)
+                .map((s) => (
+                  <div
+                    key={s}
+                    className="suggestion-item"
+                    onMouseDown={(ev) => {
+                      ev.preventDefault();
+                      if (!currentSelectedWatchlistId) {
+                        alert("Vui lòng chọn danh mục trước khi thêm mã");
+                        return;
+                      }
+
+                      if (typeof onAddStock === "function") onAddStock(s);
+                      setSearchQuery("");
+                      setSuggestionsVisible(false);
+                    }}
+                  >
+                    {s}
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
         <button className="menu-btn primary">Giao dịch</button>
         <button className="menu-btn">Cơ bản</button>
@@ -180,25 +468,23 @@ const TopMenu = ({onLogout}) => {
           {MENU_ITEMS.map((menu, index) => (
             <div key={index} className="nav-item-dropdown">
               <a className={`nav-link ${menu.active ? "active" : ""}`}>
-                {menu.title} {menu.hasDropdown && <FaCaretDown />}
+                {menu.title === "DM theo dõi"
+                  ? currentSelectedWatchlistName || menu.title
+                  : menu.title === "Nhóm ngành"
+                  ? selectedGroupTitle || menu.title
+                  : menu.title}{" "}
+                {menu.hasDropdown && <FaCaretDown />}
               </a>
               {menu.hasDropdown && (
                 <div className="dropdown-menu">
                   {menu.title === "DM theo dõi" ? (
                     <>
-                      <div
-                        className="dropdown-item"
-                        onClick={handleOpenCreateModal}
-                      >
-                        <span className="item-icon">
-                          <FaPlusCircle />
-                        </span>
-                        <span className="item-text">Tạo danh mục mới</span>
-                      </div>
                       {watchlists.map((watchlist) => (
                         <div
                           key={watchlist.id}
                           className="dropdown-item watchlist-item"
+                          onClick={() => selectWatchlist(watchlist)}
+                          style={{ cursor: "pointer" }}
                         >
                           <span className="item-text">{watchlist.name}</span>
                           <div className="watchlist-actions">
@@ -206,7 +492,7 @@ const TopMenu = ({onLogout}) => {
                               className="edit-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenEditModal(watchlist);
+                                handleEditWatchlist(watchlist);
                               }}
                             >
                               <PiNotePencilLight />
@@ -215,7 +501,7 @@ const TopMenu = ({onLogout}) => {
                               className="delete-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenDeleteModal(watchlist);
+                                handleDeleteWatchlist(watchlist);
                               }}
                             >
                               <AiOutlineDelete />
@@ -223,13 +509,38 @@ const TopMenu = ({onLogout}) => {
                           </div>
                         </div>
                       ))}
+                      <span
+                        className="dropdown-item"
+                        onClick={handleOwnedWatchlistClick}
+                        style={{ cursor: "pointer" }}
+                      >
+                        DM sở hữu
+                      </span>
+                      <div
+                        className="dropdown-item"
+                        onClick={() => setShowCreateModal(true)}
+                      >
+                        <span className="item-icon">
+                          <FaPlusCircle />
+                        </span>
+                        <span className="item-text">Tạo danh mục mới</span>
+                      </div>
                     </>
                   ) : (
                     menu.items.map((item, itemIndex) => (
                       <div
                         key={itemIndex}
-                        className={`dropdown-item ${item.active ? "active" : ""
-                          }`}
+                        className={`dropdown-item ${
+                          item.active ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          if (menu.title === "Nhóm ngành")
+                            setSelectedGroupTitle(item.text);
+                        }}
+                        style={{
+                          cursor:
+                            menu.title === "Nhóm ngành" ? "pointer" : "auto",
+                        }}
                       >
                         {item.icon && (
                           <span className="item-icon">{item.icon}</span>
@@ -257,15 +568,83 @@ const TopMenu = ({onLogout}) => {
       </div>
 
       <WatchlistModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        mode={modalMode}
-        initialData={selectedWatchlist}
-        onConfirm={handleConfirmAction}
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateWatchlist}
       />
+
+      {/* Modal sửa danh mục */}
+      {showEditModal && selectedWatchlist && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-title">Sửa tên danh mục</h2>
+            <div className="modal-body">
+              <label className="form-label">Tên muốn sửa</label>
+              <input
+                type="text"
+                className="form-input-modal"
+                defaultValue={selectedWatchlist.name}
+                id="edit-watchlist-name"
+              />
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn-submit"
+                onClick={() => {
+                  const newName = document.getElementById(
+                    "edit-watchlist-name"
+                  ).value;
+                  if (newName.trim()) {
+                    handleUpdateWatchlist({
+                      name: newName,
+                      type: selectedWatchlist.type,
+                    });
+                  }
+                }}
+              >
+                Đồng ý
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowEditModal(false)}
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal xóa danh mục */}
+      {showDeleteModal && selectedWatchlist && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="warning-icon">
+              <IoAlertCircle />
+            </div>
+            <h2 className="modal-title">Xóa danh mục theo dõi</h2>
+            <p className="modal-message">
+              Bạn thực sự muốn xóa DMQT: {selectedWatchlist.name}?
+            </p>
+            <div className="modal-footer">
+              <button className="btn-submit-warning" onClick={confirmDelete}>
+                Đồng ý
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default TopMenu;
-

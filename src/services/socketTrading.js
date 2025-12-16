@@ -220,7 +220,6 @@ export const sendWrongOTP = (otpCode) => {
   const clientSeq = getNextClientSeq();
   const encryptedOTP = encryptString(otpCode);
 
-  
   savedEncryptedOtp = encryptedOTP;
 
   const wrongOTPPayload = {
@@ -436,6 +435,98 @@ export const sendDeleteWatchlist = (watchlistId) => {
   return clientSeq;
 };
 
+// Realtime DM sở hữu
+// Lấy dữ liệu realtime cho danh mục theo dõi
+export const sendRealtimeWatchlist = () => {
+  const clientSeq = getNextClientSeq();
+
+  const realtimePayload = {
+    CltVersion: "3.1.0",
+    ClientSeq: clientSeq,
+    SecCode: TRADING_CONFIG.SEC_CODE,
+    WorkerName: "FOSqStock",
+    ServiceName: "FOSqStock_01_online",
+    TimeOut: 15,
+    MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,
+    MWLoginPswd: TRADING_CONFIG.MW_LOGIN_PSWD,
+    AppLoginID: savedAppLoginID || TRADING_CONFIG.ACCOUNT_CODE,
+    AppLoginPswd: "",
+    ClientSentTime: "0",
+    Lang: "VI",
+    MdmTp: "02",
+    InVal: [TRADING_CONFIG.ACCOUNT_CODE],
+    TotInVal: 1,
+    AprStat: "N",
+    Operation: "Q",
+    CustMgnBrch: "",
+    CustMgnAgc: "",
+    BrkMgnBrch: "",
+    BrkMgnAgc: "",
+    LoginBrch: "",
+    LoginAgnc: "",
+    AprSeq: "",
+    MakerDt: "",
+    AprIP: "",
+    AprID: "",
+    AprAmt: "",
+    IPPrivate: TRADING_CONFIG.IP_PRIVATE,
+    Otp: savedEncryptedOtp,
+    AcntNo: "",
+    SubNo: "",
+    BankCd: "",
+    PCName: "",
+    SessionID: "",
+  };
+
+  sendTradingRequest(realtimePayload);
+  return clientSeq;
+};
+
+// Nhóm ngành tài chính
+// Lấy thông tin tài chính
+export const sendFinanceInfoRequest = () => {
+  const clientSeq = getNextClientSeq();
+  const groupPayload = {
+    CltVersion: "3.1.0",
+    ClientSeq: clientSeq,
+    SecCode: TRADING_CONFIG.SEC_CODE,
+    WorkerName: "FOSqMkt02Vs",
+    ServiceName: "FOSqMkt02Vs_FinanceInfo",
+    TimeOut: 15,
+    MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,
+    MWLoginPswd: TRADING_CONFIG.MW_LOGIN_PSWD,
+    AppLoginID: savedAppLoginID || TRADING_CONFIG.ACCOUNT_CODE,
+    AppLoginPswd: "",
+    ClientSentTime: "0",
+    Lang: "VI",
+    MdmTp: "02",
+    InVal: ["10", "100"],
+    TotInVal: 2,
+    AprStat: "N",
+    Operation: "Q",
+    CustMgnBrch: "",
+    CustMgnAgc: "",
+    BrkMgnBrch: "",
+    BrkMgnAgc: "",
+    LoginBrch: "",
+    LoginAgnc: "",
+    AprSeq: "",
+    MakerDt: "",
+    AprIP: "",
+    AprID: "",
+    AprAmt: "",
+    IPPrivate: TRADING_CONFIG.IP_PRIVATE,
+    Otp: savedEncryptedOtp,
+    AcntNo: "",
+    SubNo: "",
+    BankCd: "",
+    PCName: "",
+    SessionID: "",
+  };
+  sendTradingRequest(groupPayload);
+  return clientSeq;
+};
+
 // Lấy trạng thái kết nối socket
 export const getTradingSocketStatus = () => isConnected;
 
@@ -464,6 +555,8 @@ export default {
   sendCreateWatchlist,
   sendUpdateWatchlist,
   sendDeleteWatchlist,
+  sendRealtimeWatchlist,
+  sendFinanceInfoRequest,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   getTradingSocketStatus,

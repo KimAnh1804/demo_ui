@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import "./OTPModal.scss";
-import { FaLock } from "react-icons/fa";
+import {FaLock} from "react-icons/fa";
 
 export default function OTPModal({
   isOpen,
@@ -97,8 +97,8 @@ export default function OTPModal({
         <div className="otp-modal-body">
           <p className="otp-description">
             {otpMessage &&
-            !otpMessage.includes("sai") &&
-            !otpMessage.includes("không hợp lệ")
+              !otpMessage.includes("sai") &&
+              !otpMessage.includes("không hợp lệ")
               ? otpMessage
               : "Mã xác thực YS-OTP đã được gửi đến thiết bị của bạn"}
           </p>

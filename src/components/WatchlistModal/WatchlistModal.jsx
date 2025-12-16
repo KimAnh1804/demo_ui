@@ -1,7 +1,15 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import "./WatchlistModal.scss";
+import { IoAlertCircle } from "react-icons/io5";
 
-export default function WatchlistModal({isOpen, onClose, mode = "create", initialData, onConfirm}) {
+export default function WatchlistModal({
+  isOpen,
+  onClose,
+  mode = "create",
+  initialData,
+  onConfirm,
+  onCreate,
+}) {
   const [watchlistType, setWatchlistType] = useState("0");
   const [watchlistName, setWatchlistName] = useState("");
   const [error, setError] = useState("");
@@ -19,11 +27,19 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
     }
   }, [isOpen, mode, initialData]);
 
+  // support both `onConfirm` and older/alternate prop name `onCreate`
+  const confirmHandler =
+    typeof onConfirm === "function"
+      ? onConfirm
+      : typeof onCreate === "function"
+      ? onCreate
+      : () => {};
+
   if (!isOpen) return null;
 
   const handleConfirm = () => {
     if (mode === "delete") {
-      onConfirm(initialData);
+      confirmHandler(initialData);
       onClose();
       return;
     }
@@ -33,7 +49,11 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
       return;
     }
 
-    onConfirm({...initialData, name: watchlistName, type: watchlistType});
+    confirmHandler({
+      ...initialData,
+      name: watchlistName,
+      type: watchlistType,
+    });
     onClose();
   };
 
@@ -46,14 +66,20 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
   return (
     <div className="watchlist-modal-overlay">
       <div className="watchlist-modal">
-        {mode === "delete" && <div className="warning-icon">⚠️</div>}
+        {mode === "delete" && (
+          <div className="warning-icon">
+            <IoAlertCircle />
+          </div>
+        )}
         <h2 className="modal-title">{titles[mode]}</h2>
 
         {mode !== "delete" ? (
           <div className="modal-body">
             {mode === "create" && (
               <div className="form-group">
-                <label className="form-label">Phân loại danh mục theo dõi</label>
+                <label className="form-label">
+                  Phân loại danh mục theo dõi
+                </label>
                 <div className="radio-group">
                   <label className="radio-option">
                     <input
@@ -80,7 +106,9 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
             )}
 
             <div className="form-group">
-              <label className="form-label">{mode === "edit" ? "Tên muốn sửa" : "Tên danh mục theo dõi"}</label>
+              <label className="form-label">
+                {mode === "edit" ? "Tên muốn sửa" : "Tên danh mục theo dõi"}
+              </label>
               <input
                 type="text"
                 className="form-input"
@@ -90,7 +118,18 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
                   setError("");
                 }}
               />
-              {error && <span style={{color: "red", fontSize: "12px", marginTop: "4px", display: "block"}}>{error}</span>}
+              {error && (
+                <span
+                  style={{
+                    color: "red",
+                    fontSize: "12px",
+                    marginTop: "4px",
+                    display: "block",
+                  }}
+                >
+                  {error}
+                </span>
+              )}
             </div>
           </div>
         ) : (
@@ -100,7 +139,12 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
         )}
 
         <div className="modal-footer">
-          <button className={`btn-submit ${mode === "delete" ? "btn-submit-warning" : ""}`} onClick={handleConfirm}>
+          <button
+            className={`btn-submit ${
+              mode === "delete" ? "btn-submit-warning" : ""
+            }`}
+            onClick={handleConfirm}
+          >
             Đồng ý
           </button>
           <button className="btn-cancel" onClick={onClose}>
@@ -111,4 +155,3 @@ export default function WatchlistModal({isOpen, onClose, mode = "create", initia
     </div>
   );
 }
-
