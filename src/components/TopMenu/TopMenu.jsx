@@ -170,7 +170,17 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
     const realtimeHandler = (data) => {
       console.log("TopMenu.handleFinanceGroupClick.REALTIME", data);
       try {
-        const payloads = Array.isArray(data?.Data) ? data.Data : [data];
+        let resp = data;
+        try {
+          if (resp && typeof resp.Data === "string") {
+            const parsed = JSON.parse(resp.Data);
+            resp = { ...resp, Data: parsed };
+          }
+        } catch (e) {
+          console.warn("TopMenu: failed to parse finance realtime Data", e);
+        }
+
+        const payloads = Array.isArray(resp?.Data) ? resp.Data : [resp];
         let updated = [...(lastGroupTableRef.current || [])];
 
         payloads.forEach((p) => {
@@ -348,26 +358,28 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
 
     const handler = (response) => {
       try {
+        try {
+          if (resp && typeof resp.Data === "string") {
+            const parsed = JSON.parse(resp.Data);
+            resp = { ...resp, Data: parsed };
+          }
+        } catch (e) {
+          console.warn("TopMenu: failed to parse response.Data as JSON", e);
+        }
+
         let symbols = [];
 
-        if (Array.isArray(response?.Data) && response.Data.length > 0) {
-          symbols = response.Data.map(
-            (it) => it.SecCode || it.code || it.symbol || it[0]
+        if (Array.isArray(resp?.Data) && resp.Data.length > 0) {
+          symbols = resp.Data.map(
+            (it) => it.SecCode || it.code || it.symbol || it.c0 || it[0]
           );
-        } else if (
-          Array.isArray(response?.InVal) &&
-          response.InVal.length > 0
-        ) {
-          symbols = response.InVal;
-        } else if (
-          Array.isArray(response?.OutVal) &&
-          response.OutVal.length > 0
-        ) {
-          symbols = response.OutVal;
-        } else if (Array.isArray(response)) {
-          // Some services reply with array of items
-          symbols = response.map(
-            (it) => it?.SecCode || it?.code || it?.symbol || it[0]
+        } else if (Array.isArray(resp?.InVal) && resp.InVal.length > 0) {
+          symbols = resp.InVal;
+        } else if (Array.isArray(resp?.OutVal) && resp.OutVal.length > 0) {
+          symbols = resp.OutVal;
+        } else if (Array.isArray(resp)) {
+          symbols = resp.map(
+            (it) => it?.SecCode || it?.code || it?.symbol || it?.c0 || it[0]
           );
         }
 
@@ -415,7 +427,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
               setSearchQuery(e.target.value.toUpperCase());
               setSuggestionsVisible(true);
             }}
-            onFocus={() => setSuggestionsVisible(true)}
+            onFocus={() => setSuggestionsVisible(true)} // Hiển thị gợi ý khi input được focus
             onBlur={() => setTimeout(() => setSuggestionsVisible(false), 150)}
           />
           <MdAddBox

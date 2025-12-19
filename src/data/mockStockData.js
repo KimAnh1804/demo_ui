@@ -1,994 +1,1174 @@
 export const MOCK_DATA = [
-    {
-        symbol: "ACB",
-        ceiling: 26.1,
-        floor: 22.75,
-        ref: 24.45,
-        bid: {
-            p3: 24.8, v3: 328.5,
-            p2: 24.85, v2: 375.2,
-            p1: 24.9, v1: 448.4
-        },
-        match: {
-            price: 24.9,
-            vol: 2,
-            change: 0.45,
-            percent: 1.84
-        },
-        ask: {
-            p1: 24.95, v1: 305.3,
-            p2: 25.0, v2: 986.5,
-            p3: 25.05, v3: 134.5
-        },
-        totalVol: 12219.8,
-        prices: {
-            avg: 24.82,
-            low: 24.5,
-            high: 25.0,
-            open: 24.55
-        },
-        foreign: {
-            buy: 3034.8,
-            sell: 4517.2
-        }
+  {
+    symbol: "ACB",
+    ceiling: 26.1,
+    floor: 22.75,
+    ref: 24.45,
+    bid: {
+      p3: 24.8,
+      v3: 328.5,
+      p2: 24.85,
+      v2: 375.2,
+      p1: 24.9,
+      v1: 448.4,
     },
-    {
-        symbol: "BCM",
-        ceiling: 70.5,
-        floor: 61.3,
-        ref: 65.9,
-        bid: {
-            p3: 65.8, v3: 2.9,
-            p2: 65.9, v2: 6,
-            p1: 66.0, v1: 4.0
-        },
-        match: {
-            price: 66.3,
-            vol: 1,
-            change: 0.4,
-            percent: 0.61
-        },
-        ask: {
-            p1: 66.3, v1: 3.1,
-            p2: 66.4, v2: 10.3,
-            p3: 66.5, v3: 20.8
-        },
-        totalVol: 146.9,
-        prices: {
-            avg: 66.04,
-            low: 65.5,
-            high: 66.3,
-            open: 66.0
-        },
-        foreign: {
-            buy: 60.4,
-            sell: 20.5
-        }
+    match: {
+      price: 24.9,
+      vol: 2,
+      change: 0.45,
+      percent: 1.84,
     },
-    {
-        symbol: "BID",
-        ceiling: 41.0,
-        floor: 35.75,
-        ref: 38.4,
-        bid: {
-            p3: 38.1, v3: 127.6,
-            p2: 38.15, v2: 31.6,
-            p1: 38.2, v1: 51.2
-        },
-        match: {
-            price: 38.2,
-            vol: 2,
-            change: -0.2,
-            percent: -0.52
-        },
-        ask: {
-            p1: 38.3, v1: 2.2,
-            p2: 38.35, v2: 14.9,
-            p3: 38.4, v3: 54.0
-        },
-        totalVol: 2052.1,
-        prices: {
-            avg: 38.33,
-            low: 38.05,
-            high: 38.55,
-            open: 38.5
-        },
-        foreign: {
-            buy: 184.9,
-            sell: 489.6
-        }
+    ask: {
+      p1: 24.95,
+      v1: 305.3,
+      p2: 25.0,
+      v2: 986.5,
+      p3: 25.05,
+      v3: 134.5,
     },
-    {
-        symbol: "CTG",
-        ceiling: 55.6,
-        floor: 48.4,
-        ref: 52.0,
-        bid: {
-            p3: 51.7, v3: 243.5,
-            p2: 51.8, v2: 188.3,
-            p1: 51.9, v1: 5.3
-        },
-        match: {
-            price: 52.0,
-            vol: 1.0,
-            change: 0,
-            percent: 0
-        },
-        ask: {
-            p1: 52.0, v1: 184.6,
-            p2: 52.1, v2: 158.0,
-            p3: 52.2, v3: 116.5
-        },
-        totalVol: 7554.0,
-        prices: {
-            avg: 52.03,
-            low: 51.7,
-            high: 52.6,
-            open: 52.2
-        },
-        foreign: {
-            buy: 1005.3,
-            sell: 754.1
-        }
+    totalVol: 12219.8,
+    prices: {
+      avg: 24.82,
+      low: 24.5,
+      high: 25.0,
+      open: 24.55,
     },
-    {
-        symbol: "DGC",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    foreign: {
+      buy: 3034.8,
+      sell: 4517.2,
     },
-    {
-        symbol: "FPT",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  },
+  {
+    symbol: "BCM",
+    ceiling: 70.5,
+    floor: 61.3,
+    ref: 65.9,
+    bid: {
+      p3: 65.8,
+      v3: 2.9,
+      p2: 65.9,
+      v2: 6,
+      p1: 66.0,
+      v1: 4.0,
     },
+    match: {
+      price: 66.3,
+      vol: 1,
+      change: 0.4,
+      percent: 0.61,
+    },
+    ask: {
+      p1: 66.3,
+      v1: 3.1,
+      p2: 66.4,
+      v2: 10.3,
+      p3: 66.5,
+      v3: 20.8,
+    },
+    totalVol: 146.9,
+    prices: {
+      avg: 66.04,
+      low: 65.5,
+      high: 66.3,
+      open: 66.0,
+    },
+    foreign: {
+      buy: 60.4,
+      sell: 20.5,
+    },
+  },
+  {
+    symbol: "BID",
+    ceiling: 41.0,
+    floor: 35.75,
+    ref: 38.4,
+    bid: {
+      p3: 38.1,
+      v3: 127.6,
+      p2: 38.15,
+      v2: 31.6,
+      p1: 38.2,
+      v1: 51.2,
+    },
+    match: {
+      price: 38.2,
+      vol: 2,
+      change: -0.2,
+      percent: -0.52,
+    },
+    ask: {
+      p1: 38.3,
+      v1: 2.2,
+      p2: 38.35,
+      v2: 14.9,
+      p3: 38.4,
+      v3: 54.0,
+    },
+    totalVol: 2052.1,
+    prices: {
+      avg: 38.33,
+      low: 38.05,
+      high: 38.55,
+      open: 38.5,
+    },
+    foreign: {
+      buy: 184.9,
+      sell: 489.6,
+    },
+  },
+  {
+    symbol: "CTG",
+    ceiling: 55.6,
+    floor: 48.4,
+    ref: 52.0,
+    bid: {
+      p3: 51.7,
+      v3: 243.5,
+      p2: 51.8,
+      v2: 188.3,
+      p1: 51.9,
+      v1: 5.3,
+    },
+    match: {
+      price: 52.0,
+      vol: 1.0,
+      change: 0,
+      percent: 0,
+    },
+    ask: {
+      p1: 52.0,
+      v1: 184.6,
+      p2: 52.1,
+      v2: 158.0,
+      p3: 52.2,
+      v3: 116.5,
+    },
+    totalVol: 7554.0,
+    prices: {
+      avg: 52.03,
+      low: 51.7,
+      high: 52.6,
+      open: 52.2,
+    },
+    foreign: {
+      buy: 1005.3,
+      sell: 754.1,
+    },
+  },
+  {
+    symbol: "DGC",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "FPT",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
 
-    {
-        symbol: "GAS",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  {
+    symbol: "GAS",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
     },
-    {
-        symbol: "GVR",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
     },
-    {
-        symbol: "HDB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
     },
-    {
-        symbol: "HPG",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
     },
-    {
-        symbol: "LPB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
     },
-    {
-        symbol: "MBB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  },
+  {
+    symbol: "GVR",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
     },
-    {
-        symbol: "MSN",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
     },
-    {
-        symbol: "MWG",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
     },
-    {
-        symbol: "PLX",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
     },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "HDB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "HPG",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "LPB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "MBB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "MSN",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "MWG",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "PLX",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
 
-    {
-        symbol: "SAB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  {
+    symbol: "SAB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
     },
-    {
-        symbol: "SHB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
     },
-    {
-        symbol: "SSB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
     },
-    {
-        symbol: "SSI",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
     },
-    {
-        symbol: "STB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
     },
-    {
-        symbol: "TCB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  },
+  {
+    symbol: "SHB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
     },
-    {
-        symbol: "TPB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
     },
-    {
-        symbol: "VCB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
     },
-    {
-        symbol: "VHM",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
     },
-    {
-        symbol: "VIB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
     },
-    {
-        symbol: "VIC",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+  },
+  {
+    symbol: "SSB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
     },
-    {
-        symbol: "VJC",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
     },
-    {
-        symbol: "VNM",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
     },
-    {
-        symbol: "VPB",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
     },
-    {
-        symbol: "VRE",
-        ceiling: 103.3,
-        floor: 89.9,
-        ref: 96.6,
-        bid: {
-            p3: 97.2, v3: 2.2,
-            p2: 97.3, v2: 18.5,
-            p1: 97.4, v1: 7.2
-        },
-        match: {
-            price: 97.5,
-            vol: 2,
-            change: 0.9,
-            percent: 0.93
-        },
-        ask: {
-            p1: 97.5, v1: 75.3,
-            p2: 97.6, v2: 54.0,
-            p3: 97.7, v3: 20.7
-        },
-        totalVol: 7387.5,
-        prices: {
-            avg: 97.53,
-            low: 96.5,
-            high: 98.5,
-            open: 96.6
-        },
-        foreign: {
-            buy: 2051.9,
-            sell: 1455.6
-        }
-    }
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "SSI",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "STB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "TCB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "TPB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VCB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VHM",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VIB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VIC",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VJC",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VNM",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VPB",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
+  {
+    symbol: "VRE",
+    ceiling: 103.3,
+    floor: 89.9,
+    ref: 96.6,
+    bid: {
+      p3: 97.2,
+      v3: 2.2,
+      p2: 97.3,
+      v2: 18.5,
+      p1: 97.4,
+      v1: 7.2,
+    },
+    match: {
+      price: 97.5,
+      vol: 2,
+      change: 0.9,
+      percent: 0.93,
+    },
+    ask: {
+      p1: 97.5,
+      v1: 75.3,
+      p2: 97.6,
+      v2: 54.0,
+      p3: 97.7,
+      v3: 20.7,
+    },
+    totalVol: 7387.5,
+    prices: {
+      avg: 97.53,
+      low: 96.5,
+      high: 98.5,
+      open: 96.6,
+    },
+    foreign: {
+      buy: 2051.9,
+      sell: 1455.6,
+    },
+  },
 ];

@@ -199,15 +199,15 @@ export const sendOTPVerificationRequest = (otp) => {
     SubNo: "",
     BankCd: "",
     PCName: "",
-    SessionID: "",
+    SessionID: saveSessionID,
   };
 
   sendTradingRequest(otpPayload);
   return clientSeq;
 };
 // Lưu SessionID từ response login
-export const saveSessionID = (sessionID) => {
-  savedSessionID = sessionID;
+export const saveSessionID = (SessionID) => {
+  savedSessionID = SessionID;
 };
 
 // Lưu AppLoginID từ response login
@@ -435,8 +435,6 @@ export const sendDeleteWatchlist = (watchlistId) => {
   return clientSeq;
 };
 
-// Realtime DM sở hữu
-// Lấy dữ liệu realtime cho danh mục theo dõi
 export const sendRealtimeWatchlist = () => {
   const clientSeq = getNextClientSeq();
 
