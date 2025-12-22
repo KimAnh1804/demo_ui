@@ -488,7 +488,7 @@ export const sendFinanceInfoRequest = () => {
     CltVersion: "3.1.0",
     ClientSeq: clientSeq,
     SecCode: TRADING_CONFIG.SEC_CODE,
-    WorkerName: "FOSqMkt02Vs",
+    WorkerName: "FOSqMkt02Vs", 
     ServiceName: "FOSqMkt02Vs_FinanceInfo",
     TimeOut: 15,
     MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,

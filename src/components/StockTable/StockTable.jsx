@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, {useState, useMemo} from "react";
 import "./StockTable.scss";
-import { formatVolume, formatPrice } from "../../utils/format";
+import {formatVolume, formatPrice} from "../../utils/format";
 import {
   DndContext,
   closestCenter,
@@ -16,7 +16,7 @@ import {
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import {CSS} from "@dnd-kit/utilities";
 import ka from "../../assets/ka.svg";
 
 const getPriceClass = (price, ref, ceiling, floor) => {
@@ -28,7 +28,7 @@ const getPriceClass = (price, ref, ceiling, floor) => {
   return "text-ref";
 };
 
-const StockRow = React.memo(({ stock }) => {
+const StockRow = React.memo(({stock}) => {
   const {
     attributes,
     listeners,
@@ -36,12 +36,11 @@ const StockRow = React.memo(({ stock }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: stock.symbol });
+  } = useSortable({id: stock.symbol});
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    // Khi đang drag thì làm mờ row đang được kéo đi một chút
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 999 : "auto",
     cursor: "auto",
@@ -200,7 +199,7 @@ const StockRow = React.memo(({ stock }) => {
   );
 });
 
-export default function StockTable({ data }) {
+export default function StockTable({data}) {
   const [stocks, setStocks] = useState([]);
 
   React.useEffect(() => {
@@ -221,7 +220,7 @@ export default function StockTable({ data }) {
   const stockIds = useMemo(() => stocks.map((s) => s.symbol), [stocks]);
 
   const handleDragEnd = (event) => {
-    const { active, over } = event;
+    const {active, over} = event;
 
     if (active.id !== over.id) {
       setStocks((items) => {
@@ -242,7 +241,7 @@ export default function StockTable({ data }) {
         <table className="stock-table">
           <thead>
             <tr className="header-row-1">
-              <th rowSpan={2} style={{ width: "30px" }}></th>
+              <th rowSpan={2} style={{width: "30px"}}></th>
 
               <th rowSpan={2}>Mã CK</th>
               <th rowSpan={2}>Trần</th>

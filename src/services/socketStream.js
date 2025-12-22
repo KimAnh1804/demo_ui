@@ -19,7 +19,6 @@ let listenersSetup = false;
 
 const topicHandlers = new Map();
 const subscribedTopics = new Set();
-const pendingTopics = new Set();
 const intradaySubscriptions = new Map();
 const INTRADAY_TOPICS = TOPIC_CONFIGS.map((c) => c.intraday);
 
@@ -45,7 +44,7 @@ const initSocket = () => {
 
   socket.on("connect", () => {
     isReady = true;
-    flushPendingSubscriptions();
+    
   });
 
   socket.on("disconnect", () => {
@@ -68,23 +67,59 @@ const initSocket = () => {
   return socket;
 };
 
-const flushPendingSubscriptions = () => {
-  if (pendingTopics.size === 0) return;
 
-  pendingTopics.forEach((topic) => {
-    emitSUB(topic);
-    pendingTopics.delete(topic);
-  });
+
+let clientSeq = 1;
+
+const generateTransId = () => {
+  const now = new Date();
+  const dateStr = now.toISOString().replace(/[-:T]/g, '').slice(0, 14);
+  const random = Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+  const randomStr = Math.random().toString(36).substring(2, 10).toUpperCase();
+  return `0000290095|02|01|${dateStr}|${random}|${randomStr}`;
 };
 
-const emitSUB = (topic) => {
+export const emitSUB = (symbols, board = 'G1') => {
   const s = initSocket();
-  s.emit("SUB_REQ", { topic: [topic], value: [""] });
+  
+  // Chuẩn hóa symbols thành array
+  const symbolArray = Array.isArray(symbols) ? symbols : [symbols];
+
+  const payload = {
+    ClientSeq: clientSeq++,
+    TransId: generateTransId(),
+    topic: [
+      `KRXMDDS|ST|${board}`,  // Stock Trading
+      `KRXMDDS|SI|${board}`,  // Stock Info
+      `KRXMDDS|MT|${board}`,  // Market Trading
+      `KRXMDDS|TP|${board}`,  // Trading Price
+      `KRXMDDS|MD|${board}`,  // Market Data
+    ],
+    value: symbolArray,
+  };
+  
+  console.log("[emitSUB]", payload.topic);
+  s.emit("SUB_REQ", payload);
 };
 
-const emitUNSUB = (topic) => {
+export const emitUNSUB = (symbols, board = 'G1') => {
   const s = initSocket();
-  s.emit("UNSUB_REQ", { topic: [topic] });
+  
+  const symbolArray = Array.isArray(symbols) ? symbols : [symbols];
+  
+  const payload = {
+    topic: [
+      `KRXMDDS|ST|${board}`,
+      `KRXMDDS|SI|${board}`,
+      `KRXMDDS|MT|${board}`,
+      `KRXMDDS|TP|${board}`,
+      `KRXMDDS|MD|${board}`,
+    ],
+    value: symbolArray,
+  };
+  
+  console.log("[emitUNSUB]", payload.topic);
+  s.emit("UNSUB_REQ", payload);
 };
 
 const emitHISTREQ = (topicFull, clientSeq, transId) => {
@@ -149,7 +184,7 @@ const routeDataToHandlers = (data) => {
     try {
       handler(data);
     } catch (err) {
-      console.error(`Error handling data for topic ${topic}:`, err);
+      console.error(`Error handling topic ${topic}:`, err);
     }
   });
 };
@@ -171,19 +206,31 @@ export const subscribeStream = (topic, handler) => {
   }
   topicHandlers.get(topic).push(handler);
   subscribedTopics.add(topic);
-
-  if (s.connected) {
-    emitSUB(topic);
-  } else {
-    pendingTopics.add(topic);
-  }
+  
 };
 
-export const unsubscribeStream = (topic) => {
-  topicHandlers.delete(topic);
-  subscribedTopics.delete(topic);
-  pendingTopics.delete(topic);
-  emitUNSUB(topic);
+export const unsubscribeStream = (topic, handler = null) => {
+  if (handler) {
+    // Xóa handler cụ thể
+    const handlers = topicHandlers.get(topic);
+    if (handlers) {
+      const index = handlers.indexOf(handler);
+      if (index > -1) {
+        handlers.splice(index, 1);
+      }
+  
+      if (handlers.length === 0) {
+        topicHandlers.delete(topic);
+        subscribedTopics.delete(topic);
+      }
+    }
+  } else {
+    // Xóa tất cả handlers cho topic này
+    topicHandlers.delete(topic);
+    subscribedTopics.delete(topic);
+  }
+  
+
 };
 
 export const subscribeIntradayTopic = (topic, { onHistRes } = {}) => {

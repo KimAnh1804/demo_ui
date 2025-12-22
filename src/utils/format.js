@@ -6,7 +6,8 @@ export function formatVolume(volume) {
 }
 
 export function formatValueBillion(value) {
-  if (value === undefined || value === null) return "0,00";
+  if (value === undefined || value === null) return "0.00"; 
+
   return (Number(value) / 1_000_000_000).toLocaleString("vi-VN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

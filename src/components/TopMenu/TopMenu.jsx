@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { MdAddBox } from "react-icons/md";
-import { FaCaretDown, FaPlusCircle } from "react-icons/fa";
+import React, {useState, useEffect} from "react";
+import {MdAddBox} from "react-icons/md";
+import {FaCaretDown, FaPlusCircle} from "react-icons/fa";
 import WatchlistModal from "../WatchlistModal/WatchlistModal";
 import "./TopMenu.scss";
-import { MOCK_DATA } from "../../data/mockStockData";
-import { PiNotePencilLight } from "react-icons/pi";
-import { AiOutlineDelete } from "react-icons/ai";
-import { IoAlertCircle } from "react-icons/io5";
+import {MOCK_DATA} from "../../data/mockStockData";
+import {PiNotePencilLight} from "react-icons/pi";
+import {AiOutlineDelete} from "react-icons/ai";
+import {IoAlertCircle} from "react-icons/io5";
 import {
   sendCreateWatchlist,
   sendUpdateWatchlist,
@@ -16,6 +16,35 @@ import {
   sendRealtimeWatchlist,
   sendFinanceInfoRequest,
 } from "../../services/socketTrading";
+
+const normalizeResponse = (resp) => {
+  try {
+    if (resp && typeof resp.Data === "string") {
+      return {...resp, Data: JSON.parse(resp.Data)};
+    }
+  } catch (e) { }
+  return resp;
+};
+
+const extractSymbols = (resp) => {
+  const data = resp?.Data || resp?.InVal || resp?.OutVal || resp;
+  if (!Array.isArray(data)) return [];
+
+  return data.map(it =>
+    it?.SecCode || it?.code || it?.symbol || it?.c0 || it?.[0] || it
+  ).filter(s => typeof s === 'string').map(s => s.trim());
+};
+
+const createEmptyStock = (sym) => ({
+  symbol: sym,
+  ref: 0, ceiling: 0, floor: 0,
+  bid: {p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0},
+  ask: {p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0},
+  match: {price: 0, vol: 0, change: 0, percent: 0},
+  totalVol: 0,
+  prices: {avg: 0, high: 0, low: 0, open: 0},
+  foreign: {buy: 0, sell: 0},
+});
 
 const MENU_ITEMS = [
   {
@@ -28,59 +57,59 @@ const MENU_ITEMS = [
     active: true,
     hasDropdown: true,
     items: [
-      { text: "HOSE" },
-      { text: "VN30", active: true },
-      { text: "Giao dịch thỏa thuận" },
-      { text: "Lô lẻ HOSE" },
+      {text: "HOSE"},
+      {text: "VN30", active: true},
+      {text: "Giao dịch thỏa thuận"},
+      {text: "Lô lẻ HOSE"},
     ],
   },
   {
     title: "HNX",
     hasDropdown: true,
     items: [
-      { text: "HNX" },
-      { text: "HNX30" },
-      { text: "Giao dịch thỏa thuận" },
-      { text: "Lô lẻ HNX" },
+      {text: "HNX"},
+      {text: "HNX30"},
+      {text: "Giao dịch thỏa thuận"},
+      {text: "Lô lẻ HNX"},
     ],
   },
   {
     title: "UPCOM",
     hasDropdown: true,
     items: [
-      { text: "UPCOM" },
-      { text: "Giao dịch thỏa thuận" },
-      { text: "Lô lẻ UPCOM" },
+      {text: "UPCOM"},
+      {text: "Giao dịch thỏa thuận"},
+      {text: "Lô lẻ UPCOM"},
     ],
   },
   {
     title: "Nhóm ngành",
     hasDropdown: true,
     items: [
-      { text: "Sản xuất Nông-Lâm-Ngư nghiệp" },
-      { text: "Khai khoáng" },
-      { text: "Tiện ích cộng đồng" },
-      { text: "Xây dựng và bất động sản" },
-      { text: "Sản xuất" },
-      { text: "Vận tải và kho bãi" },
-      { text: "Công nghệ-Truyền thông" },
-      { text: "Tài chính và bảo hiểm" },
-      { text: "Thuê và cho thuê" },
-      { text: "Dịch vụ chuyên môn-Khoa học-Kỹ thuật" },
-      { text: "Dịch vụ hỗ trợ-Dịch vụ xử lý và tái chế rác thải" },
-      { text: "Giáo dục và đào tạo" },
-      { text: "Dịch vụ chăm sóc sức khỏe" },
-      { text: "Nghệ thuật và dịch vụ giải trí" },
-      { text: "Dịch vụ lưu trú và ăn uống" },
-      { text: "Hành chính công" },
-      { text: "Dịch vụ khác" },
-      { text: "Bán buôn" },
-      { text: "Bán lẻ" },
+      {text: "Sản xuất Nông-Lâm-Ngư nghiệp"},
+      {text: "Khai khoáng"},
+      {text: "Tiện ích cộng đồng"},
+      {text: "Xây dựng và bất động sản"},
+      {text: "Sản xuất"},
+      {text: "Vận tải và kho bãi"},
+      {text: "Công nghệ-Truyền thông"},
+      {text: "Tài chính và bảo hiểm"},
+      {text: "Thuê và cho thuê"},
+      {text: "Dịch vụ chuyên môn-Khoa học-Kỹ thuật"},
+      {text: "Dịch vụ hỗ trợ-Dịch vụ xử lý và tái chế rác thải"},
+      {text: "Giáo dục và đào tạo"},
+      {text: "Dịch vụ chăm sóc sức khỏe"},
+      {text: "Nghệ thuật và dịch vụ giải trí"},
+      {text: "Dịch vụ lưu trú và ăn uống"},
+      {text: "Hành chính công"},
+      {text: "Dịch vụ khác"},
+      {text: "Bán buôn"},
+      {text: "Bán lẻ"},
     ],
   },
 ];
 
-const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
+const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [watchlists, setWatchlists] = useState(() => {
     // Load từ localStorage khi khởi tạo
@@ -106,40 +135,11 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
 
     const clientSeq = sendFinanceInfoRequest();
 
-    const seqHandler = (resp) => {
-      console.log("TopMenu.handleFinanceGroupClick.SEQ_RESP", resp);
+    const seqHandler = (rawResp) => {
       try {
-        let symbols = [];
-        if (Array.isArray(resp?.Data) && resp.Data.length > 0) {
-          symbols = resp.Data.map(
-            (it) => it.SecCode || it.code || it.symbol || it[0]
-          );
-        } else if (Array.isArray(resp?.InVal) && resp.InVal.length > 0) {
-          symbols = resp.InVal;
-        } else if (Array.isArray(resp?.OutVal) && resp.OutVal.length > 0) {
-          symbols = resp.OutVal;
-        } else if (Array.isArray(resp)) {
-          symbols = resp.map(
-            (it) => it?.SecCode || it?.code || it?.symbol || it[0]
-          );
-        }
-
-        symbols = (symbols || [])
-          .map((s) => (typeof s === "string" ? s.trim() : s))
-          .filter(Boolean);
-
-        const tableData = symbols.map((sym) => ({
-          symbol: sym,
-          ref: 0,
-          ceiling: 0,
-          floor: 0,
-          bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-          ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-          match: { price: 0, vol: 0, change: 0, percent: 0 },
-          totalVol: 0,
-          prices: { avg: 0, high: 0, low: 0, open: 0 },
-          foreign: { buy: 0, sell: 0 },
-        }));
+        const resp = normalizeResponse(rawResp);
+        const symbols = extractSymbols(resp);
+        const tableData = symbols.map(createEmptyStock);
 
         lastGroupTableRef.current = tableData;
         setCurrentSelectedWatchlistId(groupName);
@@ -149,7 +149,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
         if (typeof onWatchlistSelect === "function")
           onWatchlistSelect(tableData, groupName);
       } catch (e) {
-        console.error("Error handling finance info SEQ response", e, resp);
+        console.error("Error handling finance info SEQ response", e);
       } finally {
         unsubscribeTradingResponse(`SEQ_${clientSeq}`, seqHandler);
       }
@@ -157,53 +157,32 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
 
     subscribeTradingResponse(`SEQ_${clientSeq}`, seqHandler);
 
-    if (typeof groupServiceUnsubRef.current === "function") {
-      try {
-        groupServiceUnsubRef.current();
-      } catch (e) {
-        console.warn("Error unsubscribing previous group service", e);
-      }
+    if (groupServiceUnsubRef.current) {
+      groupServiceUnsubRef.current();
       groupServiceUnsubRef.current = null;
     }
 
     const serviceName = "FOSqMkt02Vs_FinanceInfo";
     const realtimeHandler = (data) => {
-      console.log("TopMenu.handleFinanceGroupClick.REALTIME", data);
       try {
-        let resp = data;
-        try {
-          if (resp && typeof resp.Data === "string") {
-            const parsed = JSON.parse(resp.Data);
-            resp = { ...resp, Data: parsed };
-          }
-        } catch (e) {
-          console.warn("TopMenu: failed to parse finance realtime Data", e);
-        }
-
+        const resp = normalizeResponse(data);
         const payloads = Array.isArray(resp?.Data) ? resp.Data : [resp];
         let updated = [...(lastGroupTableRef.current || [])];
 
         payloads.forEach((p) => {
-          const sym =
-            p.SecCode || p.code || p.symbol || p?.InVal?.[0] || p?.OutVal?.[0];
+          const sym = p.SecCode || p.code || p.symbol || p?.InVal?.[0] || p?.OutVal?.[0];
           if (!sym) return;
+
           const idx = updated.findIndex((r) => r.symbol === sym);
           const newValues = {};
-          if (p.t30217 !== undefined)
-            newValues.match = {
-              ...(updated[idx]?.match || {}),
-              price: parseFloat(p.t30217),
-            };
-          if (p.t40003 !== undefined)
-            newValues.match = {
-              ...(newValues.match || updated[idx]?.match || {}),
-              change: parseFloat(p.t40003),
-            };
+          if (p.t30217 !== undefined) newValues.match = {...(updated[idx]?.match || {}), price: parseFloat(p.t30217)};
+          if (p.t40003 !== undefined) newValues.match = {...(newValues.match || updated[idx]?.match || {}), change: parseFloat(p.t40003)};
           if (p.t387 !== undefined) newValues.totalVol = parseFloat(p.t387);
+
           if (idx > -1) {
-            updated[idx] = { ...updated[idx], ...newValues };
+            updated[idx] = {...updated[idx], ...newValues};
           } else {
-            updated.push({ symbol: sym, ...newValues });
+            updated.push({symbol: sym, ...newValues});
           }
         });
 
@@ -211,7 +190,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
         if (typeof onWatchlistSelect === "function")
           onWatchlistSelect(updated, groupName);
       } catch (e) {
-        console.error("Error handling finance realtime", e, data);
+        console.error("Error handling finance realtime", e);
       }
     };
 
@@ -272,7 +251,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
         setWatchlists(
           watchlists.map((w) =>
             w.id === selectedWatchlist.id
-              ? { ...w, name: updatedData.name, type: updatedData.type }
+              ? {...w, name: updatedData.name, type: updatedData.type}
               : w
           )
         );
@@ -304,25 +283,9 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
       }
     }
 
-    const tableData = symbols.map((sym) => ({
-      symbol: sym,
-      ref: 0,
-      ceiling: 0,
-      floor: 0,
-      bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-      ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-      match: { price: 0, vol: 0, change: 0, percent: 0 },
-      totalVol: 0,
-      prices: { avg: 0, high: 0, low: 0, open: 0 },
-      foreign: { buy: 0, sell: 0 },
-    }));
+    const tableData = symbols.map(createEmptyStock);
 
     if (typeof onWatchlistSelect === "function") {
-      console.log("TopMenu.selectWatchlist", {
-        id: watchlist.id,
-        name: watchlist.name,
-        tableSize: tableData.length,
-      });
       setCurrentSelectedWatchlistId(watchlist.id);
       setCurrentSelectedWatchlistName(watchlist.name || "");
       onWatchlistSelect(tableData, watchlist.name || "");
@@ -356,57 +319,17 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
     setCurrentSelectedWatchlistId("owned");
     setCurrentSelectedWatchlistName("DM sở hữu");
 
-    const handler = (response) => {
+    const handler = (rawResp) => {
       try {
-        try {
-          if (resp && typeof resp.Data === "string") {
-            const parsed = JSON.parse(resp.Data);
-            resp = { ...resp, Data: parsed };
-          }
-        } catch (e) {
-          console.warn("TopMenu: failed to parse response.Data as JSON", e);
-        }
-
-        let symbols = [];
-
-        if (Array.isArray(resp?.Data) && resp.Data.length > 0) {
-          symbols = resp.Data.map(
-            (it) => it.SecCode || it.code || it.symbol || it.c0 || it[0]
-          );
-        } else if (Array.isArray(resp?.InVal) && resp.InVal.length > 0) {
-          symbols = resp.InVal;
-        } else if (Array.isArray(resp?.OutVal) && resp.OutVal.length > 0) {
-          symbols = resp.OutVal;
-        } else if (Array.isArray(resp)) {
-          symbols = resp.map(
-            (it) => it?.SecCode || it?.code || it?.symbol || it?.c0 || it[0]
-          );
-        }
-
-        symbols = (symbols || [])
-          .map((s) => (typeof s === "string" ? s.trim() : s))
-          .filter(Boolean);
-
-        const tableData = symbols.map((sym) => ({
-          symbol: sym,
-          ref: 0,
-          ceiling: 0,
-          floor: 0,
-          bid: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-          ask: { p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0 },
-          match: { price: 0, vol: 0, change: 0, percent: 0 },
-          totalVol: 0,
-          prices: { avg: 0, high: 0, low: 0, open: 0 },
-          foreign: { buy: 0, sell: 0 },
-        }));
+        const resp = normalizeResponse(rawResp);
+        const symbols = extractSymbols(resp);
+        const tableData = symbols.map(createEmptyStock);
 
         if (typeof onWatchlistSelect === "function") {
           onWatchlistSelect(tableData, "DM sở hữu");
-        } else {
-          console.warn("onWatchlistSelect not provided");
         }
       } catch (e) {
-        console.error("Error parsing realtime watchlist response", e, response);
+        console.error("Error parsing realtime watchlist response", e);
       } finally {
         unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
       }
@@ -427,7 +350,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
               setSearchQuery(e.target.value.toUpperCase());
               setSuggestionsVisible(true);
             }}
-            onFocus={() => setSuggestionsVisible(true)} // Hiển thị gợi ý khi input được focus
+            onFocus={() => setSuggestionsVisible(true)}
             onBlur={() => setTimeout(() => setSuggestionsVisible(false), 150)}
           />
           <MdAddBox
@@ -483,8 +406,8 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
                 {menu.title === "DM theo dõi"
                   ? currentSelectedWatchlistName || menu.title
                   : menu.title === "Nhóm ngành"
-                  ? selectedGroupTitle || menu.title
-                  : menu.title}{" "}
+                    ? selectedGroupTitle || menu.title
+                    : menu.title}{" "}
                 {menu.hasDropdown && <FaCaretDown />}
               </a>
               {menu.hasDropdown && (
@@ -496,7 +419,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
                           key={watchlist.id}
                           className="dropdown-item watchlist-item"
                           onClick={() => selectWatchlist(watchlist)}
-                          style={{ cursor: "pointer" }}
+                          style={{cursor: "pointer"}}
                         >
                           <span className="item-text">{watchlist.name}</span>
                           <div className="watchlist-actions">
@@ -524,7 +447,7 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
                       <span
                         className="dropdown-item"
                         onClick={handleOwnedWatchlistClick}
-                        style={{ cursor: "pointer" }}
+                        style={{cursor: "pointer"}}
                       >
                         DM sở hữu
                       </span>
@@ -542,9 +465,8 @@ const TopMenu = ({ user, onLogout, onWatchlistSelect, onAddStock }) => {
                     menu.items.map((item, itemIndex) => (
                       <div
                         key={itemIndex}
-                        className={`dropdown-item ${
-                          item.active ? "active" : ""
-                        }`}
+                        className={`dropdown-item ${item.active ? "active" : ""
+                          }`}
                         onClick={() => {
                           if (menu.title === "Nhóm ngành")
                             setSelectedGroupTitle(item.text);
