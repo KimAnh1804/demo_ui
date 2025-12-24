@@ -1,75 +1,5 @@
-// Mapping dữ liệu socket sang object thân thiện cho UI
-function mapSocketDataToRow(data) {
-  // Xử lý TPBID (thông tin dư mua) - mảng có 3 level
-  const bidData = data.TPBID || [];
-  const bid1 = bidData.find(b => b.t83 === 1) || {};
-  const bid2 = bidData.find(b => b.t83 === 2) || {};
-  const bid3 = bidData.find(b => b.t83 === 3) || {};
 
-  // Xử lý TPOFFER (thông tin dư bán) - mảng có 3 level
-  const offerData = data.TPOFFER || [];
-  const offer1 = offerData.find(o => o.t83 === 1) || {};
-  const offer2 = offerData.find(o => o.t83 === 2) || {};
-  const offer3 = offerData.find(o => o.t83 === 3) || {};
 
-  // Tính toán % thay đổi
-  const change = data.t40003 || 0;
-  const ref = data.t40002 || 0;
-  const percent = ref ? ((parseFloat(change) / parseFloat(ref)) * 100).toFixed(2) : 0;
-
-  return {
-    symbol: data.t55, // mã CK
-    board: data.t20004 || 'G1', // sàn giao dịch (G1, G2, G3)
-    ref: ref, // giá tham chiếu
-    ceiling: data.t30221 || 0, // giá trần
-    floor: data.t30220 || 0, // giá sàn
-    
-    // Thông tin dư mua (3 level)
-    bid: {
-      p1: bid1.t270 || 0, // giá mua 1
-      v1: bid1.t271 || 0, // KL mua 1
-      p2: bid2.t270 || 0, // giá mua 2
-      v2: bid2.t271 || 0, // KL mua 2
-      p3: bid3.t270 || 0, // giá mua 3
-      v3: bid3.t271 || 0, // KL mua 3
-    },
-    
-    // Thông tin dư bán (3 level)
-    ask: {
-      p1: offer1.t270 || 0, // giá bán 1
-      v1: offer1.t271 || 0, // KL bán 1
-      p2: offer2.t270 || 0, // giá bán 2
-      v2: offer2.t271 || 0, // KL bán 2
-      p3: offer3.t270 || 0, // giá bán 3
-      v3: offer3.t271 || 0, // KL bán 3
-    },
-    
-    // Thông tin khớp lệnh
-    match: {
-      price: data.t31 || 0, // giá khớp lệnh
-      vol: data.t32 || 0, // khối lượng khớp lệnh
-      change: change,
-      percent: percent,
-    },
-    
-    // Tổng khối lượng
-    totalVol: data.t387 || 0, // tổng KL giao dịch
-    
-    // Thông tin giá
-    prices: {
-      avg: data.t30218 || 0, // giá trung bình
-      high: data.t333 || 0, // giá cao nhất
-      low: data.t332 || 0, // giá thấp nhất
-      open: data.t30219 || 0, // giá mở cửa
-    },
-    
-    // Thông tin ĐTNN
-    foreign: {
-      buy: data.t30223 || 0, // ĐTNN mua
-      sell: data.t30224 || 0, // ĐTNN bán
-    },
-  };
-}
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   subscribeStream,
@@ -78,7 +8,105 @@ import {
   emitUNSUB,
 } from "../services/socketStream";
 
-// Helper tạo object stock rỗng
+
+function mergeSocketDataToRow(prevStock, data) {
+  if (!data) return prevStock;
+  
+  const newStock = { ...prevStock };
+
+ 
+  if (data.t55) newStock.symbol = data.t55;
+  if (data.t20004) newStock.board = data.t20004;
+
+
+  if (data.t140 !== undefined) newStock.ref = data.t140;
+  if (data.t137 !== undefined) newStock.ref = data.t137; 
+  if (data.t132 !== undefined) newStock.ref = data.t132; 
+  if (data.t20013 !== undefined) newStock.ref = data.t20013; 
+  if (data.t1149 !== undefined) newStock.ceiling = data.t1149;
+  if (data.t1148 !== undefined) newStock.floor = data.t1148;
+
+ 
+  if (data.TPBID && Array.isArray(data.TPBID)) {
+    const newBid = { ...newStock.bid };
+    data.TPBID.forEach(b => {
+      const lvl = b.t83; 
+      if (lvl >= 1 && lvl <= 3) {
+        if (b.t270 !== undefined) newBid[`p${lvl}`] = b.t270;
+        if (b.t271 !== undefined) newBid[`v${lvl}`] = b.t271;
+      }
+    });
+    newStock.bid = newBid;
+  }
+
+  if (data.TPOFFER && Array.isArray(data.TPOFFER)) {
+    const newAsk = { ...newStock.ask };
+    data.TPOFFER.forEach(o => {
+      const lvl = o.t83; // 1, 2, 3
+      if (lvl >= 1 && lvl <= 3) {
+        if (o.t270 !== undefined) newAsk[`p${lvl}`] = o.t270;
+        if (o.t271 !== undefined) newAsk[`v${lvl}`] = o.t271;
+      }
+    });
+    newStock.ask = newAsk;
+  }
+
+  const newMatch = { ...newStock.match };
+  
+  if (data.t270 !== undefined) newMatch.price = data.t270;
+  if (data.t271 !== undefined) newMatch.vol = data.t271;
+  
+  if (data.t330 !== undefined) newMatch.change = data.t330;
+
+  // Tính toán Change và Percent dựa trên Price và Ref
+  // Change = Price - Ref
+  const currentPrice = parseFloat(newMatch.price);
+  const currentRef = parseFloat(newStock.ref);
+
+  if (!isNaN(currentPrice) && !isNaN(currentRef) && currentRef > 0 && currentPrice > 0) {
+    const change = currentPrice - currentRef;
+    newMatch.change = change;
+    newMatch.percent = ((change / currentRef) * 100).toFixed(2);
+  }
+  
+  newStock.match = newMatch;
+
+  
+  if (data.t387 !== undefined) newStock.totalVol = data.t387;
+
+  const newPrices = { ...newStock.prices };
+  let pricesChanged = false;
+  if (data.t40001 !== undefined) { newPrices.avg = data.t40001; pricesChanged = true; }
+  if (data.t30562 !== undefined) { newPrices.high = data.t30562; pricesChanged = true; }
+  if (data.t30563 !== undefined) { newPrices.low = data.t30563; pricesChanged = true; }
+  if (data.t30561 !== undefined) { newPrices.open = data.t30561; pricesChanged = true; }
+  if (pricesChanged) newStock.prices = newPrices;
+
+
+  const newForeign = { ...newStock.foreign };
+  let foreignChanged = false;
+
+  if (data.FRG) {
+    if (data.FRG.t30645 !== undefined) { 
+      newForeign.buy = data.FRG.t30645; 
+      foreignChanged = true; 
+    }
+    if (data.FRG.t30643 !== undefined) { 
+      newForeign.sell = data.FRG.t30643; 
+      foreignChanged = true; 
+    }
+  } 
+
+  if (!foreignChanged) {
+      if (data.t30645 !== undefined) { newForeign.buy = data.t30645; foreignChanged = true; }
+      if (data.t30643 !== undefined) { newForeign.sell = data.t30643; foreignChanged = true; }
+  }
+
+  if (foreignChanged) newStock.foreign = newForeign;
+
+  return newStock;
+}
+
 const createEmptyStock = (symbol, board = 'G1') => ({
   symbol: symbol,
   board: board,
@@ -96,7 +124,6 @@ const createEmptyStock = (symbol, board = 'G1') => ({
 export const useStockTableData = () => {
   const lastSavedSymbolsRef = useRef("");
 
-  // Khởi tạo state từ localStorage nếu có
   const [tableData, setTableData] = useState(() => {
     try {
       const saved = localStorage.getItem("saved_table_symbols");
@@ -124,6 +151,7 @@ export const useStockTableData = () => {
     setWatchlistTitle(title || "");
   }, []);
 
+
   const handleStockUpdate = useCallback((data, symbol) => {
     if (!data?.data) return;
     const d = data.data;
@@ -132,32 +160,74 @@ export const useStockTableData = () => {
       if (!prevData) return prevData;
       return prevData.map((stock) => {
         if (stock.symbol !== symbol) return stock;
-        return { ...stock, ...mapSocketDataToRow(d) };
+        return mergeSocketDataToRow(stock, d);
       });
     });
   }, []);
 
+  const subRef = useRef("");
+
   useEffect(() => {
     if (!tableData || tableData.length === 0) return;
 
-    const symbols = tableData.map((s) => s.symbol);
-    const board = tableData[0]?.board || 'G1';
+    const symbolsKey = tableData.map(s => `${s.symbol}|${s.board || 'G1'}`).sort().join(',');
 
-    emitSUB(symbols, board);
+    if (subRef.current === symbolsKey) return;
+    
+    subRef.current = symbolsKey;
 
-    symbols.forEach((symbol) => {
-      const topicTP = `KRXMDDS|TP|${board}|${symbol}`;
-      const handler = (data) => handleStockUpdate(data, symbol);
-      subscribeStream(topicTP, handler);
+    const stocksByBoard = tableData.reduce((acc, stock) => {
+      const b = stock.board;
+      const targetBoards = (b === 'UNKNOWN' || !b) ? ['G1'] : [b];
+      
+      targetBoards.forEach(board => {
+        if (!acc[board]) acc[board] = [];
+        acc[board].push(stock.symbol);
+      });
+      return acc;
+    }, {});
+
+    // 1. Gửi lệnh SUB request theo từng board
+    Object.entries(stocksByBoard).forEach(([board, symbols]) => {
+      emitSUB(symbols, board);
+    });
+    
+    const topicTypes = ['TP', 'SI', 'ST', 'MD', 'MT'];
+
+    tableData.forEach((stock) => {
+      const b = stock.board;
+      const targetBoards = (b === 'UNKNOWN' || !b) ? ['G1'] : [b];
+
+      targetBoards.forEach(board => {
+        topicTypes.forEach(type => {
+          const topic = `KRXMDDS|${type}|${board}|${stock.symbol}`;
+          const handler = (data) => handleStockUpdate(data, stock.symbol);
+          subscribeStream(topic, handler);
+        });
+      });
     });
 
     return () => {
-      emitUNSUB(symbols, board);
-      symbols.forEach((symbol) => {
-        unsubscribeStream(`KRXMDDS|TP|${board}|${symbol}`);
+  
+      
+      Object.entries(stocksByBoard).forEach(([board, symbols]) => {
+        emitUNSUB(symbols, board);
       });
+      
+      tableData.forEach((stock) => {
+        const b = stock.board;
+        const targetBoards = (b === 'UNKNOWN' || !b) ? ['G1'] : [b];
+
+        targetBoards.forEach(board => {
+          topicTypes.forEach(type => {
+            unsubscribeStream(`KRXMDDS|${type}|${board}|${stock.symbol}`);
+          });
+        });
+      });
+      
+    
     };
-  }, [tableData, handleStockUpdate]);
+  }, [JSON.stringify(tableData.map(s => `${s.symbol}|${s.board || 'UNKNOWN'}`))]); 
 
   const handleAddStock = useCallback((symbol, board = 'G1') => {
     setTableData((prev) => {
@@ -173,9 +243,10 @@ export const useStockTableData = () => {
     if (tableData) {
       const symbolsToSave = tableData.map(s => ({
         symbol: s.symbol,
-        board: s.board || 'G1'
+        symbol: s.symbol,
+        board: s.board || 'UNKNOWN'
       }));
-      // Serialize để so sánh tránh ghi liên tục nếu không đổi
+      
       const json = JSON.stringify(symbolsToSave);
       const currentSaved = localStorage.getItem("saved_table_symbols");
       
@@ -190,5 +261,8 @@ export const useStockTableData = () => {
     watchlistTitle,
     handleWatchlistSelect,
     handleAddStock,
+  
+    
+    
   };
 };

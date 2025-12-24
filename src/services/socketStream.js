@@ -82,7 +82,7 @@ const generateTransId = () => {
 export const emitSUB = (symbols, board = 'G1') => {
   const s = initSocket();
   
-  // Chuẩn hóa symbols thành array
+
   const symbolArray = Array.isArray(symbols) ? symbols : [symbols];
 
   const payload = {
@@ -98,7 +98,7 @@ export const emitSUB = (symbols, board = 'G1') => {
     value: symbolArray,
   };
   
-  console.log("[emitSUB]", payload.topic);
+
   s.emit("SUB_REQ", payload);
 };
 
@@ -118,7 +118,7 @@ export const emitUNSUB = (symbols, board = 'G1') => {
     value: symbolArray,
   };
   
-  console.log("[emitUNSUB]", payload.topic);
+
   s.emit("UNSUB_REQ", payload);
 };
 
@@ -177,6 +177,9 @@ const routeDataToHandlers = (data) => {
   if (!data || typeof data !== "object") return;
 
   const topic = extractTopicFromData(data);
+  if (topic) {
+    console.log(`[onFOSStream] ${topic}`, data);
+  }
   if (!topic || !topicHandlers.has(topic)) return;
 
   const handlers = topicHandlers.get(topic);

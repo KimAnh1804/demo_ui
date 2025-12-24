@@ -26,17 +26,46 @@ const normalizeResponse = (resp) => {
   return resp;
 };
 
-const extractSymbols = (resp) => {
+const extractStockInfos = (resp) => {
   const data = resp?.Data || resp?.InVal || resp?.OutVal || resp;
   if (!Array.isArray(data)) return [];
 
-  return data.map(it =>
-    it?.SecCode || it?.code || it?.symbol || it?.c0 || it?.[0] || it
-  ).filter(s => typeof s === 'string').map(s => s.trim());
+  return data.map(it => {
+    let symbol = null;
+    let board = null;
+
+    if (typeof it === 'string') {
+
+      if (it.includes('|')) {
+        const parts = it.split('|');
+        symbol = parts[0];
+        board = parts[1];
+      } else {
+        symbol = it;
+      }
+    } else if (Array.isArray(it)) {
+      symbol = it[0];
+
+      board = it[1];
+    } else if (typeof it === 'object') {
+      symbol = it?.SecCode || it?.code || it?.symbol || it?.c0 || it?.t55 || it?.[0];
+      board = it?.board || it?.Board || it?.floor || it?.Floor || it?.t20004 || it?.c1 || it?.mk || it?.market;
+    }
+
+    if (!symbol || typeof symbol !== 'string') return null;
+
+
+    let normBoard = 'UNKNOWN';
+
+    let ref = it?.t20013 ? parseFloat(it.t20013) : 0;
+
+    return {symbol: symbol.trim(), board: normBoard, ref};
+  }).filter(x => x);
 };
 
-const createEmptyStock = (sym) => ({
+const createEmptyStock = (sym, board) => ({
   symbol: sym,
+  board: board,
   ref: 0, ceiling: 0, floor: 0,
   bid: {p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0},
   ask: {p1: 0, v1: 0, p2: 0, v2: 0, p3: 0, v3: 0},
@@ -54,11 +83,10 @@ const MENU_ITEMS = [
   },
   {
     title: "VN30",
-    active: true,
     hasDropdown: true,
     items: [
       {text: "HOSE"},
-      {text: "VN30", active: true},
+      {text: "VN30"},
       {text: "Giao dịch thỏa thuận"},
       {text: "Lô lẻ HOSE"},
     ],
@@ -127,6 +155,8 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [selectedGroupTitle, setSelectedGroupTitle] = useState("");
+  const [activeMenuTitle, setActiveMenuTitle] = useState("VN30");
+  const [activeSubItem, setActiveSubItem] = useState("VN30");
   const lastGroupTableRef = React.useRef([]);
   const groupServiceUnsubRef = React.useRef(null);
 
@@ -138,13 +168,18 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
     const seqHandler = (rawResp) => {
       try {
         const resp = normalizeResponse(rawResp);
-        const symbols = extractSymbols(resp);
-        const tableData = symbols.map(createEmptyStock);
+        const stockInfos = extractStockInfos(resp);
+        const tableData = stockInfos.map(s => {
+          const st = createEmptyStock(s.symbol, s.board);
+          if (s.ref > 0) st.ref = s.ref;
+          return st;
+        });
 
         lastGroupTableRef.current = tableData;
         setCurrentSelectedWatchlistId(groupName);
-        setCurrentSelectedWatchlistName(groupName);
+        setCurrentSelectedWatchlistName("");
         setSelectedGroupTitle(groupName);
+        setActiveMenuTitle("Nhóm ngành");
 
         if (typeof onWatchlistSelect === "function")
           onWatchlistSelect(tableData, groupName);
@@ -161,48 +196,12 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
       groupServiceUnsubRef.current();
       groupServiceUnsubRef.current = null;
     }
-
-    const serviceName = "FOSqMkt02Vs_FinanceInfo";
-    const realtimeHandler = (data) => {
-      try {
-        const resp = normalizeResponse(data);
-        const payloads = Array.isArray(resp?.Data) ? resp.Data : [resp];
-        let updated = [...(lastGroupTableRef.current || [])];
-
-        payloads.forEach((p) => {
-          const sym = p.SecCode || p.code || p.symbol || p?.InVal?.[0] || p?.OutVal?.[0];
-          if (!sym) return;
-
-          const idx = updated.findIndex((r) => r.symbol === sym);
-          const newValues = {};
-          if (p.t30217 !== undefined) newValues.match = {...(updated[idx]?.match || {}), price: parseFloat(p.t30217)};
-          if (p.t40003 !== undefined) newValues.match = {...(newValues.match || updated[idx]?.match || {}), change: parseFloat(p.t40003)};
-          if (p.t387 !== undefined) newValues.totalVol = parseFloat(p.t387);
-
-          if (idx > -1) {
-            updated[idx] = {...updated[idx], ...newValues};
-          } else {
-            updated.push({symbol: sym, ...newValues});
-          }
-        });
-
-        lastGroupTableRef.current = updated;
-        if (typeof onWatchlistSelect === "function")
-          onWatchlistSelect(updated, groupName);
-      } catch (e) {
-        console.error("Error handling finance realtime", e);
-      }
-    };
-
-    groupServiceUnsubRef.current = subscribeTradingResponse(
-      serviceName,
-      realtimeHandler
-    );
   };
 
   // Lưu vào localStorage mỗi khi watchlists thay đổi
   useEffect(() => {
     localStorage.setItem("watchlists", JSON.stringify(watchlists));
+
   }, [watchlists]);
 
   const handleCreateWatchlist = (watchlistData) => {
@@ -283,11 +282,16 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
       }
     }
 
-    const tableData = symbols.map(createEmptyStock);
+    const tableData = symbols.map(s => {
+      if (typeof s === 'string') return createEmptyStock(s);
+      return createEmptyStock(s.symbol, s.board);
+    });
 
     if (typeof onWatchlistSelect === "function") {
       setCurrentSelectedWatchlistId(watchlist.id);
       setCurrentSelectedWatchlistName(watchlist.name || "");
+      setSelectedGroupTitle("");
+      setActiveMenuTitle("DM theo dõi");
       onWatchlistSelect(tableData, watchlist.name || "");
     }
   };
@@ -318,18 +322,47 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
     const clientSeq = sendRealtimeWatchlist();
     setCurrentSelectedWatchlistId("owned");
     setCurrentSelectedWatchlistName("DM sở hữu");
+    setSelectedGroupTitle("");
+    setActiveMenuTitle("DM theo dõi");
 
     const handler = (rawResp) => {
       try {
         const resp = normalizeResponse(rawResp);
-        const symbols = extractSymbols(resp);
-        const tableData = symbols.map(createEmptyStock);
+        const stockInfos = extractStockInfos(resp);
+        const tableData = stockInfos.map(s => createEmptyStock(s.symbol, s.board));
 
         if (typeof onWatchlistSelect === "function") {
           onWatchlistSelect(tableData, "DM sở hữu");
         }
       } catch (e) {
         console.error("Error parsing realtime watchlist response", e);
+      } finally {
+        unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+      }
+    };
+
+    subscribeTradingResponse(`SEQ_${clientSeq}`, handler);
+  };
+
+  const handleFinanceInfoClick = () => {
+    if (typeof sendFinanceInfoRequest !== "function") return;
+
+    const clientSeq = sendFinanceInfoRequest();
+    setCurrentSelectedWatchlistId("finance");
+    setCurrentSelectedWatchlistName("DM theo dõi");
+    setSelectedGroupTitle("");
+
+    const handler = (rawResp) => {
+      try {
+        const resp = normalizeResponse(rawResp);
+        const stockInfos = extractStockInfos(resp);
+        const tableData = stockInfos.map(s => createEmptyStock(s.symbol, s.board));
+
+        if (typeof onWatchlistSelect === "function") {
+          onWatchlistSelect(tableData, "DM theo dõi");
+        }
+      } catch (e) {
+        console.error("Error parsing finance info response", e);
       } finally {
         unsubscribeTradingResponse(`SEQ_${clientSeq}`, handler);
       }
@@ -402,7 +435,7 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
         <div className="nav-links">
           {MENU_ITEMS.map((menu, index) => (
             <div key={index} className="nav-item-dropdown">
-              <a className={`nav-link ${menu.active ? "active" : ""}`}>
+              <a className={`nav-link ${activeMenuTitle === menu.title ? "active" : ""}`}>
                 {menu.title === "DM theo dõi"
                   ? currentSelectedWatchlistName || menu.title
                   : menu.title === "Nhóm ngành"
@@ -417,7 +450,8 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
                       {watchlists.map((watchlist) => (
                         <div
                           key={watchlist.id}
-                          className="dropdown-item watchlist-item"
+                          className={`dropdown-item watchlist-item ${currentSelectedWatchlistId === watchlist.id ? "active" : ""
+                            }`}
                           onClick={() => selectWatchlist(watchlist)}
                           style={{cursor: "pointer"}}
                         >
@@ -445,7 +479,8 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
                         </div>
                       ))}
                       <span
-                        className="dropdown-item"
+                        className={`dropdown-item ${currentSelectedWatchlistId === "owned" ? "active" : ""
+                          }`}
                         onClick={handleOwnedWatchlistClick}
                         style={{cursor: "pointer"}}
                       >
@@ -462,26 +497,35 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
                       </div>
                     </>
                   ) : (
-                    menu.items.map((item, itemIndex) => (
-                      <div
-                        key={itemIndex}
-                        className={`dropdown-item ${item.active ? "active" : ""
-                          }`}
-                        onClick={() => {
-                          if (menu.title === "Nhóm ngành")
-                            setSelectedGroupTitle(item.text);
-                        }}
-                        style={{
-                          cursor:
-                            menu.title === "Nhóm ngành" ? "pointer" : "auto",
-                        }}
-                      >
-                        {item.icon && (
-                          <span className="item-icon">{item.icon}</span>
-                        )}
-                        <span className="item-text">{item.text}</span>
-                      </div>
-                    ))
+                    menu.items.map((item, itemIndex) => {
+                      const isActive =
+                        menu.title === "Nhóm ngành"
+                          ? selectedGroupTitle === item.text
+                          : activeSubItem === item.text;
+                      return (
+                        <div
+                          key={itemIndex}
+                          className={`dropdown-item ${isActive ? "active" : ""}`}
+                          onClick={() => {
+                            if (menu.title === "Nhóm ngành") {
+                              handleFinanceGroupClick(item.text);
+                            } else {
+                              handleFinanceInfoClick();
+                              setActiveMenuTitle(menu.title);
+                              setActiveSubItem(item.text);
+                            }
+                          }}
+                          style={{
+                            cursor: "pointer",
+                          }}
+                        >
+                          {item.icon && (
+                            <span className="item-icon">{item.icon}</span>
+                          )}
+                          <span className="item-text">{item.text}</span>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               )}

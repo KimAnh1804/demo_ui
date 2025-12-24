@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, {useState, useMemo} from "react";
 import {
   IndexCard,
   IndexChart,
@@ -6,19 +6,19 @@ import {
   StockTable,
   TopMenu,
 } from "./components";
-import { useAuth } from "./contexts/AuthContext";
+import {useAuth} from "./contexts/AuthContext";
 import websocket from "./services/socketStream";
 import "./AppMain.scss";
 import {
   INITIAL_INDEX_LIST,
   INITIAL_CARD_CONFIGS,
 } from "./configs/marketConfig";
-import { useIndexData } from "./hooks/useIndexData";
-import { useIntradayData } from "./hooks/useIntradayData";
-import { useStockTableData } from "./hooks/useStockTableData";
+import {useIndexData} from "./hooks/useIndexData";
+import {useIntradayData} from "./hooks/useIntradayData";
+import {useStockTableData} from "./hooks/useStockTableData";
 
 export function MainApp() {
-  const { user, logout, isAuthenticated, isGuestMode } = useAuth();
+  const {user, logout, isAuthenticated, isGuestMode} = useAuth();
   const [indexList, setIndexList] = useState(INITIAL_INDEX_LIST);
 
   const {
@@ -31,7 +31,7 @@ export function MainApp() {
 
   const intradayData = useIntradayData(updateChartFromIntraday);
 
-  const { tableData, handleWatchlistSelect, handleAddStock } =
+  const {tableData, handleWatchlistSelect, handleAddStock} =
     useStockTableData();
 
   const [cardSymbols, setCardSymbols] = useState(

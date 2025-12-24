@@ -481,7 +481,6 @@ export const sendRealtimeWatchlist = () => {
 };
 
 // Nhóm ngành tài chính
-// Lấy thông tin tài chính
 export const sendFinanceInfoRequest = () => {
   const clientSeq = getNextClientSeq();
   const groupPayload = {
