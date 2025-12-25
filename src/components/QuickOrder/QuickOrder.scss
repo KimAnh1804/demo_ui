@@ -1,0 +1,399 @@
+.quick-order-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: transparent;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.quick-order-container {
+    background: #000;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
+    border: 1px solid #2a2a2a;
+    border-bottom: none;
+    animation: slideUp 0.3s ease-out;
+    pointer-events: auto;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+.close-btn-x {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.2s;
+
+    &:hover {
+        color: #ff6b35;
+    }
+}
+
+// Left Panel
+.order-left-panel {
+    flex: 1;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+}
+
+// Top Section with Tabs and Buttons
+.top-section {
+    background: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.tabs-and-actions {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px 12px;
+
+    .tab-btn {
+        padding: 10px 24px;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-right: none;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:first-of-type {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        &:nth-of-type(2) {
+            border-right: 1px solid #444;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            margin-right: 12px;
+        }
+
+        &:hover {
+            background: #3a3a3a;
+        }
+
+        &.active {
+            background: #ff6b35;
+            color: #fff;
+            border-color: #ff6b35;
+        }
+    }
+
+    .action-btn {
+        padding: 10px 36px;
+        border: none;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-radius: 4px;
+
+        &.buy-btn {
+            background: #34C85E;
+            color: #fff;
+            margin-left: auto;
+
+            &:hover {
+                background: #2ab34f;
+            }
+        }
+
+        &.sell-btn {
+            background: #ef4444;
+            color: #fff;
+            margin-left: 4px;
+
+            &:hover {
+                background: #dc2626;
+            }
+        }
+    }
+
+    .right-tab {
+        padding: 10px 20px;
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-left: none;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: 4px;
+
+        &:first-of-type {
+            margin-left: 12px;
+            border-left: 1px solid #444;
+        }
+
+        &:hover {
+            background: #3a3a3a;
+        }
+
+        &.active {
+            background: #ff6b35;
+            color: #fff;
+            border-color: #ff6b35;
+        }
+    }
+}
+
+// Extra buttons (Sổ lệnh, Sức mua, CK sở hữu)
+.extra-btn {
+    padding: 10px 20px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 4px;
+
+    &:hover {
+        background: #3a3a3a;
+    }
+}
+
+// Order Content - Single column compact layout
+.order-content {
+    padding: 12px 20px;
+    background: #0a0a0a;
+}
+
+.account-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+
+    .account-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 8px 12px;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background: transparent;
+    }
+
+    .account-select {
+        padding: 0;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    .account-code {
+        color: #666;
+        font-size: 11px;
+    }
+
+    .type-btn {
+        padding: 6px 18px;
+        background: #1a1a1a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: #2a2a2a;
+        }
+
+        &.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+    }
+
+    .buying-power-display {
+        margin-left: auto;
+        color: #999;
+        font-size: 13px;
+
+        span {
+            color: #fff;
+            font-weight: 600;
+        }
+    }
+}
+
+// Input Section
+.input-section {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+
+    .input-field {
+        flex: 1;
+        padding: 10px 12px;
+        background: #1a1a1a;
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 13px;
+
+        &::placeholder {
+            color: #666;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: #666;
+        }
+    }
+}
+
+// Price Info Section
+.price-info-section {
+    padding: 14px 20px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+
+    .info-labels {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 10px;
+
+        span {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .total-label {
+            margin-left: auto;
+        }
+    }
+
+    .total-value {
+        text-align: right;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+    }
+}
+
+// Max Section
+.max-section {
+    display: flex;
+    gap: 40px;
+    padding: 14px 20px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1a1a1a;
+
+    .max-item {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+
+        span {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .max-value {
+            color: #fff;
+            font-weight: 600;
+        }
+    }
+}
+
+// Action Buttons
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #0a0a0a;
+    margin-top: auto;
+
+    button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .group-btn {
+        background: #34C85E;
+        color: #fff;
+
+        &:hover {
+            background: #059669;
+        }
+    }
+
+    .submit-btn {
+        &.buy {
+            background: #34C85E;
+            color: #fff;
+
+            &:hover {
+                background: #059669;
+            }
+        }
+
+        &.sell {
+            background: #ef4444;
+            color: #fff;
+
+            &:hover {
+                background: #dc2626;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .tabs-and-actions {
+        flex-wrap: wrap;
+    }
+
+    .input-section {
+        flex-direction: column;
+    }
+}

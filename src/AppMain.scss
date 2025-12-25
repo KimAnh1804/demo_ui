@@ -148,3 +148,82 @@
     padding: 0.5rem;
   }
 }
+
+// Floating Action Buttonsfab-text
+.floating-actions {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 9999;
+
+  @media (max-width: 768px) {
+    bottom: 12px;
+    left: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.fab-btn {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 20px;
+  height: 40px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: white;
+  font-weight: bold;
+
+  .fab-icon {
+    font-size: 15px;
+    line-height: 1;
+
+  }
+
+  .fab-text {
+    white-space: nowrap;
+
+    @media (max-width: 480px) {
+      display: none;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  &.quick-order-btn {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+
+    &:hover {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    }
+  }
+
+  &.order-book-btn {
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+
+    &:hover {
+      background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 14px;
+
+    .fab-icon {
+      font-size: 18px;
+    }
+  }
+}

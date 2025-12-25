@@ -6,6 +6,8 @@ import {
   StockTable,
   TopMenu,
 } from "./components";
+import QuickOrder from "./components/QuickOrder/QuickOrder";
+import OrderBook from "./components/OrderBook/OrderBook";
 import {useAuth} from "./contexts/AuthContext";
 import websocket from "./services/socketStream";
 import "./AppMain.scss";
@@ -16,6 +18,8 @@ import {
 import {useIndexData} from "./hooks/useIndexData";
 import {useIntradayData} from "./hooks/useIntradayData";
 import {useStockTableData} from "./hooks/useStockTableData";
+import quickorder from "./assets/quickorder.png";
+import {PiNoteFill} from "react-icons/pi";
 
 export function MainApp() {
   const {user, logout, isAuthenticated, isGuestMode} = useAuth();
@@ -43,6 +47,11 @@ export function MainApp() {
   }, [setCardConfigs]);
 
   const connected = websocket.getStreamStatus();
+
+  // States for modals
+  const [showQuickOrder, setShowQuickOrder] = useState(false);
+  const [showOrderBook, setShowOrderBook] = useState(false);
+  const [selectedStockForOrder, setSelectedStockForOrder] = useState('');
 
   return (
     <div className="app-root">
@@ -142,6 +151,37 @@ export function MainApp() {
       <div className="app-stock-table-section">
         <StockTable data={tableData} />
       </div>
+
+      {/* Floating Action Buttons */}
+      <div className="floating-actions">
+        <button
+          className="fab-btn quick-order-btn"
+          onClick={() => setShowQuickOrder(true)}
+          title="Đặt lệnh nhanh"
+        >
+          <span className="fab-icon"><img src={quickorder} style={{width: '20px', height: '20px'}} alt="quick-order" /></span>
+          <span className="fab-text">Đặt lệnh nhanh</span>
+        </button>
+        <button
+          className="fab-btn order-book-btn"
+          onClick={() => setShowOrderBook(true)}
+          title="Sổ lệnh"
+        >
+          <span className="fab-icon"><PiNoteFill /></span>
+          <span className="fab-text">Sổ lệnh</span>
+        </button>
+      </div>
+
+      {/* Modals */}
+      <QuickOrder
+        isOpen={showQuickOrder}
+        onClose={() => setShowQuickOrder(false)}
+        selectedStock={selectedStockForOrder}
+      />
+      <OrderBook
+        isOpen={showOrderBook}
+        onClose={() => setShowOrderBook(false)}
+      />
     </div>
   );
 }

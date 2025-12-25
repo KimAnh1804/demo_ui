@@ -538,6 +538,34 @@ export const disconnectTradingSocket = () => {
   }
 };
 
+// Lấy danh sách ngành - mã CK
+export const sendListStockIndustryRequest = () => {
+ 
+  const payload = {
+    reqFunct: reqFunct.GET_LIST_STOCK_INDUSTRY,
+		WorkerName: 'FOSqMkt02',
+		ServiceName: 'FOSqMkt02_FinanceInfo',
+		ClientSentTime: '0',
+		Operation: 'Q'
+  };
+  sendTradingRequest(payload);
+};
+
+// Lấy danh sách trái phiếu
+export const sendGetListIndividualBondsSecuritiesRequest = () => {
+
+  const payload = {
+ 
+        reqFunct: reqFunct.GET_LIST_INDIVIDUAL_BONDS_SECURITIES,
+        WorkerName: 'FOSqBond01',
+        ServiceName: 'FOSqBond01_Common',
+        Operation: 'Q',
+        ClientSentTime: '0',
+  };
+  sendTradingRequest(payload);
+
+};
+
 // Lấy encrypted OTP đã lưu
 export const getSavedEncryptedOtp = () => savedEncryptedOtp;
 
@@ -554,6 +582,8 @@ export default {
   sendDeleteWatchlist,
   sendRealtimeWatchlist,
   sendFinanceInfoRequest,
+  sendListStockIndustryRequest,
+  sendGetListIndividualBondsSecuritiesRequest,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   getTradingSocketStatus,
