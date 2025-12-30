@@ -6,9 +6,15 @@ let tradingSocket = null;
 let isConnected = false;
 let clientSeq = 0;
 const tradingHandlers = new Map();
-let savedEncryptedOtp = "";
-let savedSessionID = "";
-let savedAppLoginID = "";
+const STORAGE_KEYS = {
+  SESSION_ID: "TRADING_SESSION_ID",
+  APP_LOGIN_ID: "TRADING_APP_LOGIN_ID",
+  OTP: "TRADING_OTP"
+};
+
+let savedEncryptedOtp = localStorage.getItem(STORAGE_KEYS.OTP) || "";
+let savedSessionID = localStorage.getItem(STORAGE_KEYS.SESSION_ID) || "";
+let savedAppLoginID = localStorage.getItem(STORAGE_KEYS.APP_LOGIN_ID) || "";
 
 const getNextClientSeq = () => {
   clientSeq += 1;
@@ -163,6 +169,10 @@ export const sendOTPVerificationRequest = (otp) => {
   // Nhận mã OTP từ người dùng
   const clientSeq = getNextClientSeq();
   const encryptedOTP = encryptString(otp); // Mã hóa OTP
+  
+  // Save OTP for later use and persist
+  savedEncryptedOtp = encryptedOTP;
+  localStorage.setItem(STORAGE_KEYS.OTP, savedEncryptedOtp);
 
   const otpPayload = {
     CltVersion: "3.1.0",
@@ -208,11 +218,17 @@ export const sendOTPVerificationRequest = (otp) => {
 // Lưu SessionID từ response login
 export const saveSessionID = (SessionID) => {
   savedSessionID = SessionID;
+  if (SessionID) {
+      localStorage.setItem(STORAGE_KEYS.SESSION_ID, SessionID);
+  }
 };
 
 // Lưu AppLoginID từ response login
 export const saveAppLoginID = (appLoginID) => {
   savedAppLoginID = appLoginID;
+  if (appLoginID) {
+      localStorage.setItem(STORAGE_KEYS.APP_LOGIN_ID, appLoginID);
+  }
 };
 
 // Gửi yêu cầu OTP sai
@@ -535,35 +551,139 @@ export const disconnectTradingSocket = () => {
     savedEncryptedOtp = "";
     savedSessionID = "";
     savedAppLoginID = "";
+    
+    // Clear storage
+    localStorage.removeItem(STORAGE_KEYS.OTP);
+    localStorage.removeItem(STORAGE_KEYS.SESSION_ID);
+    localStorage.removeItem(STORAGE_KEYS.APP_LOGIN_ID);
   }
+};
+
+
+const reqFunct = {
+  GET_LIST_STOCK_INDUSTRY: "GET_LIST_STOCK_INDUSTRY",
+  GET_LIST_INDIVIDUAL_BONDS_SECURITIES: "GET_LIST_INDIVIDUAL_BONDS_SECURITIES"
 };
 
 // Lấy danh sách ngành - mã CK
 export const sendListStockIndustryRequest = () => {
- 
+  const clientSeq = getNextClientSeq();
   const payload = {
     reqFunct: reqFunct.GET_LIST_STOCK_INDUSTRY,
-		WorkerName: 'FOSqMkt02',
-		ServiceName: 'FOSqMkt02_FinanceInfo',
-		ClientSentTime: '0',
-		Operation: 'Q'
+    WorkerName: 'FOSqMkt02',
+    ServiceName: 'FOSqMkt02_FinanceInfo',
+    ClientSentTime: '0',
+    Operation: 'Q',
+    ClientSeq: clientSeq
   };
   sendTradingRequest(payload);
+  return clientSeq;
 };
 
 // Lấy danh sách trái phiếu
 export const sendGetListIndividualBondsSecuritiesRequest = () => {
-
+  const clientSeq = getNextClientSeq();
   const payload = {
- 
-        reqFunct: reqFunct.GET_LIST_INDIVIDUAL_BONDS_SECURITIES,
-        WorkerName: 'FOSqBond01',
-        ServiceName: 'FOSqBond01_Common',
-        Operation: 'Q',
-        ClientSentTime: '0',
+    reqFunct: reqFunct.GET_LIST_INDIVIDUAL_BONDS_SECURITIES,
+    WorkerName: 'FOSqBond01',
+    ServiceName: 'FOSqBond01_Common',
+    Operation: 'Q',
+    ClientSentTime: '0',
+    ClientSeq: clientSeq
   };
   sendTradingRequest(payload);
+  return clientSeq;
+};
 
+
+// Lấy sức mua 
+export const sendGetBuyPowerRequest = (accountNo, symbol) => {
+  const clientSeq = getNextClientSeq();
+  const payload = {
+    CltVersion: "3.1.0",
+    ClientSeq: clientSeq,
+    SecCode: TRADING_CONFIG.SEC_CODE,
+    WorkerName: 'FOSqBuyPower',
+    ServiceName: 'FOSqBuyPower',
+    TimeOut: 15,
+    MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,
+    MWLoginPswd: TRADING_CONFIG.MW_LOGIN_PSWD,
+    AppLoginID: savedAppLoginID || TRADING_CONFIG.ACCOUNT_CODE,
+    AppLoginPswd: "",
+    ClientSentTime: '0',
+    Lang: "VI",
+    MdmTp: "02",
+    InVal: [accountNo, "01", symbol],
+    TotInVal: 3,
+    AprStat: "N",
+    Operation: 'Q',
+    CustMgnBrch: "",
+    CustMgnAgc: "",
+    BrkMgnBrch: "",
+    BrkMgnAgc: "",
+    LoginBrch: "",
+    LoginAgnc: "",
+    AprSeq: "",
+    MakerDt: "",
+    AprIP: "",
+    AprID: "",
+    AprAmt: "",
+    IPPrivate: TRADING_CONFIG.IP_PRIVATE,
+    Otp: savedEncryptedOtp,
+    AcntNo: "",
+    SubNo: "",
+    BankCd: "",
+    PCName: "",
+    SessionID: "",
+  };
+  console.log("[sendGetBuyPowerRequest] Sending payload:", payload);
+  sendTradingRequest(payload);
+  return clientSeq;
+};
+
+// Lấy khả năng bán 
+export const sendGetSellAbleRequest = (accountNo) => {
+  const clientSeq = getNextClientSeq();
+  const payload = {
+    CltVersion: "3.1.0",
+    ClientSeq: clientSeq,
+    SecCode: TRADING_CONFIG.SEC_CODE,
+    WorkerName: 'FOSqSellAble',
+    ServiceName: 'FOSqSellAble',
+    TimeOut: 15,
+    MWLoginID: TRADING_CONFIG.MW_LOGIN_ID,
+    MWLoginPswd: TRADING_CONFIG.MW_LOGIN_PSWD,
+    AppLoginID: savedAppLoginID || TRADING_CONFIG.ACCOUNT_CODE,
+    AppLoginPswd: "",
+    ClientSentTime: '0',
+    Lang: "VI",
+    MdmTp: "02",
+    InVal: ["02", "today", accountNo, "01", "%", "G1"],
+    TotInVal: 6,
+    AprStat: "N",
+    Operation: 'Q',
+    CustMgnBrch: "",
+    CustMgnAgc: "",
+    BrkMgnBrch: "",
+    BrkMgnAgc: "",
+    LoginBrch: "",
+    LoginAgnc: "",
+    AprSeq: "",
+    MakerDt: "",
+    AprIP: "",
+    AprID: "",
+    AprAmt: "",
+    IPPrivate: TRADING_CONFIG.IP_PRIVATE,
+    Otp: savedEncryptedOtp,
+    AcntNo: "",
+    SubNo: "",
+    BankCd: "",
+    PCName: "",
+    SessionID: "",
+  };
+  console.log("[sendGetSellAbleRequest] Sending payload:", payload);
+  sendTradingRequest(payload);
+  return clientSeq;
 };
 
 // Lấy encrypted OTP đã lưu
@@ -584,6 +704,8 @@ export default {
   sendFinanceInfoRequest,
   sendListStockIndustryRequest,
   sendGetListIndividualBondsSecuritiesRequest,
+  sendGetBuyPowerRequest,
+  sendGetSellAbleRequest,
   subscribeTradingResponse,
   unsubscribeTradingResponse,
   getTradingSocketStatus,

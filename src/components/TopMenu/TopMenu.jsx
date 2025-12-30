@@ -15,6 +15,8 @@ import {
   unsubscribeTradingResponse,
   sendRealtimeWatchlist,
   sendFinanceInfoRequest,
+  sendGetListIndividualBondsSecuritiesRequest,
+  sendListStockIndustryRequest
 } from "../../services/socketTrading";
 
 const normalizeResponse = (resp) => {
@@ -28,38 +30,47 @@ const normalizeResponse = (resp) => {
 
 const extractStockInfos = (resp) => {
   const data = resp?.Data || resp?.InVal || resp?.OutVal || resp;
-  if (!Array.isArray(data)) return [];
+
+  if (!Array.isArray(data)) {
+    if (typeof data === 'string') {
+      if (data.includes(';')) return extractStockInfos({Data: data.split(';')});
+      if (data.includes('\n')) return extractStockInfos({Data: data.split('\n')});
+      return extractStockInfos({Data: [data]});
+    }
+    if (typeof data === 'object' && data !== null) return extractStockInfos({Data: [data]});
+    return [];
+  }
 
   return data.map(it => {
     let symbol = null;
     let board = null;
+    let name = "";
 
     if (typeof it === 'string') {
-
       if (it.includes('|')) {
         const parts = it.split('|');
         symbol = parts[0];
         board = parts[1];
+        if (parts.length > 2 && isNaN(parts[2])) name = parts[2];
       } else {
         symbol = it;
       }
     } else if (Array.isArray(it)) {
       symbol = it[0];
-
       board = it[1];
+      if (it.length > 2 && typeof it[2] === 'string') name = it[2];
     } else if (typeof it === 'object') {
       symbol = it?.SecCode || it?.code || it?.symbol || it?.c0 || it?.t55 || it?.[0];
       board = it?.board || it?.Board || it?.floor || it?.Floor || it?.t20004 || it?.c1 || it?.mk || it?.market;
+      name = it?.SecName || it?.name || it?.Name || it?.t56 || "";
     }
 
     if (!symbol || typeof symbol !== 'string') return null;
 
-
-    let normBoard = 'UNKNOWN';
-
+    let normBoard = board || 'UNKNOWN';
     let ref = it?.t20013 ? parseFloat(it.t20013) : 0;
 
-    return {symbol: symbol.trim(), board: normBoard, ref};
+    return {symbol: symbol.trim(), board: normBoard, ref, name: name || ""};
   }).filter(x => x);
 };
 
@@ -151,7 +162,45 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
     useState(null);
   const [currentSelectedWatchlistName, setCurrentSelectedWatchlistName] =
     useState("");
+  const [allStocks, setAllStocks] = useState([]);
 
+  useEffect(() => {
+    const handleStockResponse = (resp) => {
+      try {
+        const norm = normalizeResponse(resp);
+        const info = extractStockInfos(norm);
+        if (info && info.length > 0) {
+          setAllStocks(prev => {
+            const existing = new Set(prev.map(s => s.symbol));
+            const newItems = info.filter(s => !existing.has(s.symbol));
+            return [...prev, ...newItems];
+          });
+        }
+      } catch (e) {
+        console.error("Error processing stock list response", e);
+      }
+    };
+
+    // Fetch Stock Industry
+    const req1 = sendListStockIndustryRequest();
+    if (req1) {
+      const handler1 = (resp) => {
+        handleStockResponse(resp);
+        unsubscribeTradingResponse(`SEQ_${req1}`, handler1);
+      };
+      subscribeTradingResponse(`SEQ_${req1}`, handler1);
+    }
+
+    // Fetch Bonds/Securities
+    const req2 = sendGetListIndividualBondsSecuritiesRequest();
+    if (req2) {
+      const handler2 = (resp) => {
+        handleStockResponse(resp);
+        unsubscribeTradingResponse(`SEQ_${req2}`, handler2);
+      };
+      subscribeTradingResponse(`SEQ_${req2}`, handler2);
+    }
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
   const [selectedGroupTitle, setSelectedGroupTitle] = useState("");
@@ -400,30 +449,62 @@ const TopMenu = ({user, onLogout, onWatchlistSelect, onAddStock}) => {
           />
 
           {suggestionsVisible && searchQuery && (
-            <div className="search-suggestions">
-              {(MOCK_DATA || [])
-                .map((m) => m.symbol)
-                .filter((s) => s && s.includes(searchQuery))
-                .slice(0, 10)
-                .map((s) => (
-                  <div
-                    key={s}
-                    className="suggestion-item"
-                    onMouseDown={(ev) => {
-                      ev.preventDefault();
-                      if (!currentSelectedWatchlistId) {
-                        alert("Vui lòng chọn danh mục trước khi thêm mã");
-                        return;
-                      }
+            <div className="search-suggestions" style={{width: '400px'}}>
+              {((allStocks && allStocks.length > 0) ? allStocks : (MOCK_DATA || []))
+                .filter((s) => {
+                  if (!s) return false;
+                  const query = searchQuery.toUpperCase();
+                  const symbol = s.symbol ? s.symbol.toUpperCase() : "";
+                  const name = s.name ? s.name.toUpperCase() : "";
+                  return symbol.includes(query) || name.includes(query);
+                })
+                .slice(0, 100)
+                .map((item, idx) => {
+                  const symbol = item.symbol || "";
+                  const name = item.name || "";
+                  const board = item.board || "";
+                  const query = searchQuery.toUpperCase();
 
-                      if (typeof onAddStock === "function") onAddStock(s);
-                      setSearchQuery("");
-                      setSuggestionsVisible(false);
-                    }}
-                  >
-                    {s}
-                  </div>
-                ))}
+                  const highlightText = (text, highlight) => {
+                    if (!text) return "";
+                    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
+                    return parts.map((part, i) =>
+                      part.toUpperCase() === highlight.toUpperCase() ?
+                        <span key={i} style={{color: '#ff4d4f'}}>{part}</span> : part
+                    );
+                  };
+
+                  return (
+                    <div
+                      key={`${symbol}-${idx}`}
+                      className="suggestion-item"
+                      onMouseDown={(ev) => {
+                        ev.preventDefault();
+                        if (!currentSelectedWatchlistId) {
+                          alert("Vui lòng chọn danh mục trước khi thêm mã");
+                          return;
+                        }
+
+                        if (typeof onAddStock === "function") onAddStock(symbol);
+                        setSearchQuery("");
+                        setSuggestionsVisible(false);
+                      }}
+                      style={{display: 'flex', alignItems: 'center', gap: '5px', padding: '8px 12px', borderBottom: '1px solid #333'}}
+                    >
+                      <span style={{color: '#fff', minWidth: '40px'}}>{board}</span>
+                      <span style={{color: '#666'}}> - </span>
+                      <span style={{fontWeight: 'bold', minWidth: '50px'}}>{highlightText(symbol, query)}</span>
+                      {name && (
+                        <>
+                          <span style={{color: '#666'}}> - </span>
+                          <span style={{flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                            {highlightText(name, query)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>

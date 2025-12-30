@@ -38,6 +38,8 @@ export const FIELD_MAPPING = {
   // Nhà đầu tư nước ngoài
   t30645: 'foreignBuyVolume', // Khối lượng ĐTNN mua
   t30643: 'foreignSellVolume', // Khối lượng ĐTNN bán
+  t30558: 'foreignRoom', // Room nước ngoài (khối lượng còn lại cho phép ĐTNN mua)
+  t30557: 'foreignBuyValue', // Giá trị ĐTNN mua
 
   // Phiên giao dịch
   t336: 'sessionCode', // Mã phiên giao dịch
